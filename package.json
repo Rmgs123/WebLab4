@@ -1,0 +1,41 @@
+{
+  "name": "electron-vue-template",
+  "version": "0.1.0",
+  "description": "A minimal Electron + Vue application",
+  "main": "build/main/main.js",
+  "scripts": {
+    "dev": "node scripts/dev-server.js",
+    "build": "node scripts/build.js && electron-builder",
+    "build:win": "node scripts/build.js && electron-builder --win",
+    "build:mac": "node scripts/build.js && electron-builder --mac",
+    "build:linux": "node scripts/build.js && electron-builder --linux"
+  },
+  "repository": "https://github.com/deluze/electron-vue-template",
+  "author": {
+    "name": "Deluze",
+    "url": "https://github.com/Deluze"
+  },
+  "devDependencies": {
+    "@types/jsonwebtoken": "^9.0.5",
+    "@vitejs/plugin-vue": "^4.0.0",
+    "chalk": "^4.1.2",
+    "chokidar": "^3.5.3",
+    "electron": "^25.2.0",
+    "electron-builder": "^24.2.1",
+    "typescript": "^4.8.4",
+    "vite": "^4.1.1"
+  },
+  "dependencies": {
+    "phaser": "^3.70.0",
+    "axios": "^1.6.2",
+    "bootstrap": "^5.3.2",
+    "jquery": "^3.7.1",
+    "jsonwebtoken": "^9.0.2",
+    "popper.js": "^1.16.1",
+    "vee-validate": "^2.2.15",
+    "vue": "^3.2.47",
+    "vue-cookies": "^1.8.3",
+    "vue-router": "^4.2.5",
+    "vuex": "^4.1.0"
+  }
+}
