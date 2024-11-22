@@ -1,7 +1,5 @@
 <div align="center"> 
 
-Disgn doc: https://docs.google.com/document/d/1WlNtTAagPx1RMfJB8adXuOf8WLFIRRPRd_xc0xR9nWE/edit
-Auth: https://github.com/3member-crew/game_auth
 ### Install dependencies ⏬
 
 ```bash
