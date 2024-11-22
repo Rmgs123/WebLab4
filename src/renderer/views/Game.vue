@@ -1,256 +1,202 @@
 <template>
-    <div class="bg">
-        <div class="game" v-if="counter !== 0">
-            <div class="timer">
-                Осталось: {{ counter }}
-            </div>
-            <div class="score-info">
-                Ваш счет: {{ currScore }}
-            </div>
-            <div class="objects">
-                <img src="../assets/log.png" class="bounty-rune" v-if="isLeftLog">
-                <div style="width: 170.66px; height: 200px;" v-else>
-                </div>
-                <div style="display: flex; justify-content: center;">
-                    <img src="../assets/beaverLeft.png" v-if="isLeftBeaver" class="beaver-img">
-                    <img src="../assets/beaverRight.png" v-else class="beaver-img">
-                </div>
-                <img src="../assets/log.png" class="bounty-rune" v-if="isRightLog">
-                <div style="width: 170.66px; height: 200px;" v-else>
-                </div>
-            </div>
-            <div class="btn">
-                <game-button @click="toLeftBeaver" style="width: 200px">
-                    Влево
-                </game-button>
-                <game-button @click="toRightBeaver" style="width: 200px">
-                    Вправо
-                </game-button>
-            </div>
-        </div>
-        <div style="height: 100vh; display: flex; align-items: center;" v-else>
-            <div class="game-over">
-                <div> 
-                    Ваш результат: {{currScore}}
-                </div>
-                <router-link to="/" style="width: 300px; display: flex; justify-content: center; align-items: center;">
-                    <game-button>
-                        Назад
-                    </game-button>
-                </router-link>
-            </div>
-        </div>
-        <img src="../assets/bg1.png" class="logs-img" v-if="currScore >= 2 && currScore < 4 && counter">
-        <img src="../assets/bg2.png" class="logs-img" v-if="currScore >= 4 && currScore < 6 && counter">
-        <img src="../assets/bg3.png" class="logs-img" v-if="currScore >= 6 && currScore < 8 && counter">
-        <img src="../assets/bg4.png" class="logs-img" v-if="currScore >= 8 && currScore < 10 && counter">
-        <img src="../assets/bg5.png" class="logs-img" v-if="currScore >= 10 && currScore < 12 && counter">
-        <img src="../assets/bg6.png" class="logs-img" v-if="currScore >= 12 && currScore < 14 && counter">
-        <img src="../assets/bg7.png" class="logs-img" v-if="currScore >= 14 && currScore < 16 && counter">
-        <img src="../assets/bg8.png" class="logs-img" v-if="currScore >= 16 && currScore < 18 && counter">
-        <img src="../assets/bg9.png" class="logs-img" v-if="currScore >= 18 && currScore < 20 && counter">
-        <img src="../assets/bg10.png" class="logs-img" v-if="currScore >= 20 && currScore < 22 && counter">
+  <div class="bg">
+    <div class="game">
+      <div class="score-info">Ваш счёт: {{ score }}</div>
+
+      <!-- Игровое поле -->
+      <div class="game-field">
+        <!-- Игрок -->
+        <div class="player" :style="{ top: playerY + 'px', left: playerX + 'px' }"></div>
+
+        <!-- Лазеры -->
+        <div
+          v-for="(laser, index) in lasers"
+          :key="index"
+          class="laser"
+          :style="{ top: laser.y + 'px', left: laser.x + 'px' }"
+        ></div>
+      </div>
     </div>
+
+    <div v-if="!isPlaying" class="game-over">
+      <div>Ваш результат: {{ score }}</div>
+      <router-link to="/" style="width: 300px; display: flex; justify-content: center; align-items: center;">
+        <game-button>Назад</game-button>
+      </router-link>
+    </div>
+  </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from "vue"
-import GameButton from "../components/GameButton.vue";
-import http from "../http_common";
+import { defineComponent } from "vue";
 
 export default defineComponent({
-    components: {
-        GameButton
+  data() {
+    return {
+      isPlaying: true, // Статус игры
+      score: 0, // Текущий счёт
+      playerX: 200, // Координаты игрока
+      playerY: 200,
+      lasers: [], // Массив лазеров
+      keysPressed: {}, // Состояние нажатия клавиш
+
+      // Конфигурация игры
+      playerSpeed: 6, // Скорость игрока
+      laserSpeed: 6, // Скорость пуль
+      maxLasers: 300, // Максимальное количество пуль
+    };
+  },
+  methods: {
+    // Обработка нажатия клавиш
+    handleKeyDown(event) {
+      const key = event.key.toLowerCase();
+      if (["w", "a", "s", "d", "ц", "ф", "ы", "в"].includes(key)) {
+        this.keysPressed[key] = true;
+      }
     },
 
-    data() {
+    // Обработка отпускания клавиш
+    handleKeyUp(event) {
+      const key = event.key.toLowerCase();
+      if (["w", "a", "s", "d", "ц", "ф", "ы", "в"].includes(key)) {
+        this.keysPressed[key] = false;
+      }
+    },
 
-        return {
-            currScore: 0,
-            counter: 20,
-            score: 0,
-            isLeftBeaver: true,
-            isRightBeaver: false,
-            isRightLog: true,
-            isLeftLog: false,
-            caught: false,
-            user: null,
-            userscore: 0,
+    // Движение игрока
+    movePlayer() {
+      let dx = 0;
+      let dy = 0;
+
+      // WASD или ЦФЫВ
+      if (this.keysPressed["w"] || this.keysPressed["ц"]) dy -= 1;
+      if (this.keysPressed["s"] || this.keysPressed["ы"]) dy += 1;
+      if (this.keysPressed["a"] || this.keysPressed["ф"]) dx -= 1;
+      if (this.keysPressed["d"] || this.keysPressed["в"]) dx += 1;
+
+      // Нормализация вектора
+      if (dx !== 0 || dy !== 0) {
+        const length = Math.sqrt(dx * dx + dy * dy);
+        dx = (dx / length) * this.playerSpeed;
+        dy = (dy / length) * this.playerSpeed;
+
+        this.playerX = Math.max(0, Math.min(380, this.playerX + dx));
+        this.playerY = Math.max(0, Math.min(380, this.playerY + dy));
+      }
+    },
+
+    // Создание нового лазера
+    spawnLaser() {
+      if (this.lasers.length >= this.maxLasers) return;
+
+      const side = Math.random() > 0.5 ? "horizontal" : "vertical";
+      const position = Math.random() * 400;
+
+      if (side === "horizontal") {
+        this.lasers.push({
+          x: Math.random() > 0.5 ? 0 : 400,
+          y: position,
+          dx: Math.random() > 0.5 ? this.laserSpeed : -this.laserSpeed,
+          dy: 0,
+        });
+      } else {
+        this.lasers.push({
+          x: position,
+          y: Math.random() > 0.5 ? 0 : 400,
+          dx: 0,
+          dy: Math.random() > 0.5 ? this.laserSpeed : -this.laserSpeed,
+        });
+      }
+    },
+
+    // Обновление пуль
+    updateLasers() {
+      this.lasers = this.lasers.map((laser) => ({
+        ...laser,
+        x: laser.x + laser.dx,
+        y: laser.y + laser.dy,
+      })).filter((laser) => laser.x >= 0 && laser.x <= 400 && laser.y >= 0 && laser.y <= 400);
+
+      // Проверка столкновений
+      this.lasers.forEach((laser) => {
+        if (
+          Math.abs(laser.x - this.playerX) < 20 &&
+          Math.abs(laser.y - this.playerY) < 20
+        ) {
+          this.endGame();
         }
+      });
     },
-    methods:
-    {
-        increment() {
-            if (this.isRightBeaver && this.isRightLog && !this.caught) {
-                this.caught = true;
-                this.currScore++;
-            }
-            else {
-                if (this.isLeftBeaver && this.isLeftLog && !this.caught) {
-                    this.caught = true;
-                    this.currScore++;
-                }
-            }
-        },
-        countDown() {
-            if (this.counter) {
-                return setTimeout(() => {
-                    --this.counter
-                    this.countDown()
-                }, 1000)
-            }
 
-            this.score = this.currScore;
-        },
-        toLeftBeaver() {
-            this.isRightBeaver = false;
-            this.isLeftBeaver = true;
-        },
-        toRightBeaver() {
-            this.isLeftBeaver = false;
-            this.isRightBeaver = true;
-        },
-        toLeftBounty() {
-            setTimeout(() => {
-                this.isLeftLog = true;
-                this.isRightLog = false;
-                this.caught = false;
-            }, 1000);
-        },
-        toRightBounty() {
-            setTimeout(() => {
-                this.isLeftLog = false;
-                this.isRightLog = true;
-                this.caught = false;
-            }, 1000);
-        },
-        bountyLoop() {
-            if (this.isRightLog) {
-                this.toLeftBounty();
-            }
-            else {
-                this.toRightBounty();
-            }
-        },
-        randomNum() {
-            var random = Math.random();
+    // Окончание игры
+    endGame() {
+      this.isPlaying = false;
+    },
+  },
+  mounted() {
+    // Добавление обработчиков клавиатуры
+    window.addEventListener("keydown", this.handleKeyDown);
+    window.addEventListener("keyup", this.handleKeyUp);
 
-            if (random < 0.34)
-                return 1;
-
-            return random;
-        },
-        handleSubmit() {
-            if (this.score > this.userscore) {
-                const response = http.put('/user/update/', {
-                    score: this.score
-                });
-            }
-        },
-    },
-    async mounted() {
-        this.countDown();
-        await http.get('/user/')
-            .then((response) => {
-                this.user = response.data;
-                this.userscore = response.data.score;
-                console.log(response)
-            })
-            .catch((e) => {
-                console.log(e)
-            })
-    },
-    beforeUpdate() {
-        this.increment();
-    },
-    updated() {
-        this.bountyLoop();
-    },
-})
+    // Основной игровой цикл
+    const gameLoop = () => {
+      if (this.isPlaying) {
+        this.movePlayer(); // Движение игрока
+        this.updateLasers(); // Обновление пуль
+        if (Math.random() < 0.05) this.spawnLaser(); // Случайное появление пуль
+        this.score++; // Увеличение счёта
+        setTimeout(gameLoop, 16); // Плавность 60 FPS
+      }
+    };
+    gameLoop();
+  },
+  beforeUnmount() {
+    // Удаление обработчиков клавиатуры
+    window.removeEventListener("keydown", this.handleKeyDown);
+    window.removeEventListener("keyup", this.handleKeyUp);
+  },
+});
 </script>
 
-<style lang="css" scoped>
-.objects {
-    display: flex;
-    justify-content: space-evenly;
-    width: 70%;
+<style scoped>
+.bg {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: black;
+  color: white;
+}
+
+.game-field {
+  width: 400px;
+  height: 400px;
+  border: 2px solid white;
+  position: relative;
+  background-color: #222;
+}
+
+.player {
+  width: 20px;
+  height: 20px;
+  background-color: red;
+  position: absolute;
+  border-radius: 50%;
+}
+
+.laser {
+  width: 20px;
+  height: 20px;
+  background-color: yellow;
+  position: absolute;
 }
 
 .game-over {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    color: #2f1e1e;
-    background-color: #b8cece;
-    border-radius: 5px;
-    font-size: 26px;
-    padding: 40px;
-    font-weight: 700;
-}
-
-.bounty-rune {
-    width: 20%;
-}
-
-.btn {
-    display: flex;
-    justify-content: space-evenly;
-    width: 50%;
-    margin-top: 30px;
-}
-
-.game {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
-    z-index: 2;
-    position: relative;
-}
-
-a {
-    text-decoration: none;
-}
-
-.beaver-img {
-    width: 50%;
-}
-
-.bg {
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-}
-
-.logs-img {
-    width: 96%;
-    z-index: 1;
-    position: absolute;
-    left: 0;
-    bottom: 0;
-    transform: scale(1.08, 1);
-}
-
-.header {
-    background-color: #060223;
-    font-size: 30px;
-    text-align: center;
-    padding: 20px;
-    color: #7f9e9f;
-    font-weight: 700;
-    z-index: 2;
-}
-
-.timer {
-    font-size: 26px;
-    padding: 30px;
-    font-weight: 700;
-}
-
-.score-info {
-    font-size: 22px;
-    font-size: 26px;
-    margin-bottom: 60px;
-    font-weight: 700;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 20px;
+  color: white;
 }
 </style>
