@@ -1,7 +1,7 @@
 <template>
   <div class="bg">
     <div class="game">
-      <div class="score-info">Ваш счёт: {{ score }}</div>
+      <div class="score-info">Your score: {{ score }}</div>
 
       <!-- Игровое поле -->
       <div class="game-field">
@@ -34,12 +34,12 @@
     </div>
 
     <div v-if="!isPlaying" class="game-over">
-      <div>Ваш результат: {{ score }}</div>
+      <div>Your result: {{ score }}</div>
       <router-link
         to="/"
-        style="width: 300px; display: flex; justify-content: center; align-items: center;"
+        style="display: flex; justify-content: center; align-items: center;"
       >
-        <button class="btn">Назад</button>
+        <button class="btn">Back</button>
       </router-link>
     </div>
   </div>
@@ -310,7 +310,7 @@ export default defineComponent({
     endGame() {
       if (this.isPlaying) {
         this.isPlaying = false;
-        alert('Игра окончена!');
+        alert('Game over!');
       }
     },
     updateLasers() {
@@ -458,15 +458,15 @@ export default defineComponent({
 .game-field {
   width: 400px;
   height: 400px;
-  border: 2px solid white;
+  border: 3px solid rgba(195, 220, 213, 0.44);
   position: relative;
   background-color: #222;
   overflow: hidden;
 }
 
 .score-info {
-  margin-bottom: 10px;
-  font-size: 18px;
+  margin-bottom: 20px;
+  font-size: 30px;
 }
 
 .player {
@@ -534,27 +534,28 @@ export default defineComponent({
   flex-direction: column;
   align-items: center;
   font-size: 20px;
+  margin-left: 120px;
   color: white;
+}
+
+.game-over a {
+  text-decoration: none;
 }
 
 .btn {
   background: none;
-  font-size: 20px;
-  color: #2f1e1e;
+  color: #afc8c4;
   margin-top: 10px;
-  border: 3px solid #7f9e9f;
-  border-radius: 10px;
-  background: #7f9e9f;
-  padding: 10px 25px;
-  font-family: 'Comfortaa', sans-serif;
-  font-size: 26px;
+  border: none;
+  background: transparent;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 30px;
   font-weight: 700;
+  transition: text-shadow 0.17s ease;
 }
 
 .btn:hover {
-  background-color: #0a2d2b;
-  color: gray;
-  border-color: #0a2d2b;
+  text-shadow: 0 0 25px #c3dcd5;
 }
 
 .btn:focus {
