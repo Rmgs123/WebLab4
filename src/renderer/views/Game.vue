@@ -1,7 +1,9 @@
 <template>
   <div class="bg">
     <div class="game">
-      <div class="score-info">Your score: {{ score }}</div>
+      <div class="time-info">
+        Time: {{ formattedTime }}
+      </div>
 
       <!-- Игровое поле -->
       <div class="game-field">
@@ -34,7 +36,7 @@
     </div>
 
     <div v-if="!isPlaying" class="game-over">
-      <div>Your result: {{ score }}</div>
+      <div>Your result: {{ formattedTime }}</div>
       <router-link
         to="/"
         style="display: flex; justify-content: center; align-items: center;"
@@ -44,7 +46,6 @@
     </div>
   </div>
 </template>
-
 <script>
 import { defineComponent } from 'vue';
 
@@ -54,19 +55,36 @@ export default defineComponent({
     return {
       isPlaying: true,
       score: 0,
+
       playerX: 190,
       playerY: 190,
       playerSpeed: 3.5,
       playerRadius: 8,
       collisionRadius: 5, // Радиус для проверки коллизии - меньше персонажа для приятной игры
       keysPressed: {},
+
       lasers: [],
       laserIdCounter: 0,
+
       lastDashTime: 0, // Для отслеживания времени последнего рывка
       dashCooldown: 1000, // Кулдаун рывка в миллисекундах
       dashDistance: 50, // Расстояние рывка
       isDashing: false, // Флаг для отображения эффекта рывка
+
+      startTime: null,
+      elapsedTime: 0,
+      timerInterval: null,
+      level: null,
     };
+  },
+  computed: {
+    formattedTime() {
+      const minutes = Math.floor(this.elapsedTime / 60000);
+      const seconds = Math.floor((this.elapsedTime % 60000) / 1000);
+      const milliseconds = Math.floor((this.elapsedTime % 1000));
+      return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}:${String(milliseconds).padStart(2, "0")}`;
+  },
+
   },
   methods: {
     handleKeyDown(event) {
@@ -132,20 +150,12 @@ export default defineComponent({
         this.playerY = Math.max(0, Math.min(384, this.playerY));
       }
     },
-    spawnLaser() {
+    spawnLaser(array) {
       const id = this.laserIdCounter++;
 
       // Случайный выбор типа лазера
-      const laserTypeRandom = Math.random();
-      let laserType;
-
-      if (laserTypeRandom < 0.33) {
-        laserType = 'red';
-      } else if (laserTypeRandom < 0.66) {
-        laserType = 'yellow';
-      } else {
-        laserType = 'blue';
-      }
+      const laserTypeRandom = Math.floor(Math.random()*array.length);
+      let laserType = array[laserTypeRandom];
 
       // Случайный выбор двух разных сторон для лазера
       const edge1 = Math.floor(Math.random() * 4);
@@ -213,7 +223,7 @@ export default defineComponent({
       } else if (laserType === 'yellow') {
         activeDuration = 3000; // Жёлтый лазер активен 3 сек
       } else if (laserType === 'blue') {
-        activeDuration = 2000; // Синий лазер активен 2 сек
+       activeDuration = 2000; // Синий лазер активен 2 сек
       }
 
       // Активация лазера после задержки
@@ -245,6 +255,7 @@ export default defineComponent({
         }, activeDuration);
       }, activationDelay);
     },
+
     getRandomPointOnEdge(edge) {
       const fieldWidth = 400;
       const fieldHeight = 400;
@@ -307,21 +318,18 @@ export default defineComponent({
       // Используем радиус коллизии вместо визуального радиуса
       return distanceSquared < this.collisionRadius * this.collisionRadius;
     },
-    endGame() {
-      if (this.isPlaying) {
-        this.isPlaying = false;
-        alert('Game over!');
-      }
-    },
+
     updateLasers() {
       const now = Date.now();
       const fieldWidth = 400;
       const fieldHeight = 400;
+
       this.lasers.forEach((laser) => {
         if (laser.color === 'blue') {
           // Лазер синий, обновляем угол на протяжении всей жизни
           const elapsed = now - laser.rotationStartTime;
           const rotationDuration = laser.rotationDuration; // Общее время вращения (3 секунды)
+
           if (elapsed < rotationDuration) {
             // Интерполируем угол
             const t = elapsed / rotationDuration;
@@ -350,6 +358,7 @@ export default defineComponent({
         }
       });
     },
+
     getLineRectangleIntersections(x0, y0, angle, fieldWidth, fieldHeight) {
       const rad = (Math.PI / 180) * angle;
       const cosTheta = Math.cos(rad);
@@ -412,10 +421,75 @@ export default defineComponent({
         return points;
       }
     },
+    startGame() {
+      this.isPlaying = true;
+      this.startTime = Date.now();
+      this.elapsedTime = 0;
+
+      // Запуск таймера
+      this.timerInterval = setInterval(() => {
+          this.elapsedTime = Date.now() - this.startTime;
+      }, 10);
+
+    },
+    endGame() {
+      this.isPlaying = false;
+
+      // Остановка таймера
+      if (this.timerInterval) {
+        clearInterval(this.timerInterval);
+        this.timerInterval = null;
+      }
+    },
+
+    spawnInterval(array,time,count) {
+        this.level = 1;
+        const interval = setInterval(() => {
+                this.spawnLaser(array);
+            }, time/count);
+
+        setTimeout(() => {
+            clearInterval(interval);
+            this.level = null;
+        }, time);
+    },
+
+    levels() {
+        if (this.level){return;}
+        if (this.elapsedTime < 1000){
+            this.spawnInterval(['red'],1000,20);
+        } else if (this.elapsedTime > 2200 && this.elapsedTime < 3200) {
+            this.spawnInterval(['yellow'],1000,12);
+        } else if (this.elapsedTime > 7000 && this.elapsedTime < 8000) {
+            this.spawnInterval(['blue'],1000,7);
+        } else if (this.elapsedTime > 11000 && this.elapsedTime < 12000) {
+            this.spawnInterval(['red'],2800,10);
+            this.spawnInterval(['yellow'],1000,10);
+        } else if (this.elapsedTime > 16000 && this.elapsedTime < 17000) {
+            this.spawnInterval(['blue'],2000,5);
+            this.spawnInterval(['yellow'],1000,5);
+        } else if (this.elapsedTime > 21000 && this.elapsedTime < 22000) {
+            this.spawnInterval(['red'],2800,5);
+            this.spawnInterval(['yellow'],1000,5);
+            this.spawnInterval(['blue'],2000,5);
+        } else if (this.elapsedTime > 26000 && this.elapsedTime < 27000) {
+            this.spawnInterval(['red'],2800,15);
+            this.spawnInterval(['yellow'],1000,7);
+            this.spawnInterval(['blue'],2000,7);
+        } else if (this.elapsedTime > 30000 && this.elapsedTime < 31000) {
+            this.spawnInterval(['red','yellow','blue'],3000,10);
+        } else if (this.elapsedTime > 33000) {
+            this.level = 1;
+            const interval = setInterval(() => {
+                this.spawnLaser(['red','yellow','blue']);
+            }, 200);
+        }
+    },
   },
   mounted() {
     window.addEventListener('keydown', this.handleKeyDown);
     window.addEventListener('keyup', this.handleKeyUp);
+    this.startGame();
 
     const gameLoop = () => {
       if (this.isPlaying) {
@@ -427,13 +501,16 @@ export default defineComponent({
       }
     };
     gameLoop();
-
-    // Спавн лазеров
-    setInterval(this.spawnLaser, 300);
+    this.levels();
+    setInterval(this.levels,10);
   },
   beforeUnmount() {
     window.removeEventListener('keydown', this.handleKeyDown);
     window.removeEventListener('keyup', this.handleKeyUp);
+
+    if (this.timerInterval) {
+      clearInterval(this.timerInterval);
+    }
   },
 });
 </script>
@@ -464,7 +541,7 @@ export default defineComponent({
   overflow: hidden;
 }
 
-.score-info {
+.time-info {
   margin-bottom: 20px;
   font-size: 30px;
 }
