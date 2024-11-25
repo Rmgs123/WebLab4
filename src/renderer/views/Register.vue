@@ -1,156 +1,160 @@
 <template>
-    <div class="register">
-        <div class="header">
-            Регистрация
-        </div>
-        <form @submit.prevent="register">
-            <div class="form">
-                <input v-model="username" type="text" placeholder="Имя пользователя" required>
-                <input v-model="email" type="text" placeholder="Почта" required>
-                <input v-model="password" type="password" placeholder="Пароль" required id="password">
-                <div class="in">
-                  <!--check register and password-->
-                    <game-button type="submit" class="enter">
-                        Войти  
-                    </game-button>
-                </div>
-                <div class="in">
-                    <router-link to="/">
-                        <game-button class="enter">
-                            Вернуться 
-                        </game-button>
-                    </router-link>
-                </div>
-            </div>
-        </form>
+  <div class="register">
+    <div class="header">
+      Registration
     </div>
+    <form @submit.prevent="register">
+      <div class="form">
+        <input v-model="username" type="text" placeholder="Username" required>
+        <input v-model="email" type="text" placeholder="Email" required>
+        <input v-model="password" type="password" placeholder="Password" required id="password">
+        <div class="in">
+          <!--check register and password-->
+          <game-button type="submit" class="enter">
+            Login
+          </game-button>
+        </div>
+        <div class="in">
+          <router-link to="/">
+            <game-button class="enter">
+              Back
+            </game-button>
+          </router-link>
+        </div>
+      </div>
+    </form>
+  </div>
 </template>
 
 <script lang="ts">
-    import http from "../http_common";
-    import GameButton from "../components/GameButton.vue";
-    import router from "../router";
+import http from "../http_common";
+import GameButton from "../components/GameButton.vue";
+import router from "../router";
 
-    export default {
-        components: {
-            GameButton
-        },
+export default {
+  components: {
+    GameButton
+  },
 
-        data() {
-            return {
-                username: '',
-                email: '',
-                password: '',
-            };
-        },
+  data() {
+    return {
+      username: '',
+      email: '',
+      password: '',
+    };
+  },
 
-        methods: {
-            async register() {
-                try {
-                    const response = await http.post('/register/', {
-                        username: this.username,
-                        email: this.email,
-                        password: this.password,
-                    });
+  methods: {
+    async register() {
+      try {
+        const response = await http.post('/register/', {
+          username: this.username,
+          email: this.email,
+          password: this.password,
+        });
 
-                    const token = response.data.token;
+        const token = response.data.token;
 
-                if (token) {
-                    this.$router.push("/");
-                    localStorage.setItem('token', token);
-                }
-            } catch (error) {
-                console.error(error);
-            }
-        },
+        if (token) {
+          this.$router.push("/");
+          localStorage.setItem('token', token);
+        }
+      } catch (error) {
+        console.error(error);
+      }
     },
+  },
 };
 </script>
 
 <style scoped lang="css">
-.login-form {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+.register {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center; /* Центрируем по горизонтали */
+  height: 100vh;
 }
 
 .header {
-    background-color: #060223;
-    font-size: 30px;
-    text-align: center;
-    padding: 20px;
-    color: #7f9e9f;
-    font-weight: 700;
+  background: transparent;
+  font-size: 60px;
+  text-align: center;
+  padding: 20px;
+  color: #7f9e9f;
+  font-weight: 900;
 }
 
 .form {
-    display: flex;
-    flex-direction: column;
-    background-color: #b8cece;
-    border-radius: 5px;
-    padding: 10px;
-    align-items: center;
+  display: flex;
+  flex-direction: column;
+  background: transparent;
+  border-radius: 5px;
+  padding: 10px;
+  align-items: center;
 }
 
 .form input {
-    margin-bottom: 10px;
+  margin-bottom: 10px;
 }
 
 .form div {
-    margin-bottom: 10px;
+  margin-bottom: 10px;
 }
 
 input {
-    padding: 5px;
-    background: none;
-    border: 3px solid #8496ae;
-    border-radius: 10px;
-    font-size: 20px;
-    font-family: 'Comfortaa', sans-serif;
+  color: white;
+  padding: 5px;
+  background: none;
+  border: 1px solid #637081;
+  border-radius: 10px;
+  font-size: 20px;
+  font-family: 'Comfortaa', sans-serif;
+  transition: box-shadow 0.17s ease-in-out;
 }
 
 input:focus {
-    outline: none;
+  outline: none;
+  box-shadow: 0 0 8px #94d1d1;
 }
 
 .pwrd {
-    display: flex;
+  display: flex;
 }
 
 .pwrd-img {
-    width: 4cqmin;
+  width: 4cqmin;
 }
 
 .show {
-    width: 15%;
-    margin-left: 1em;
-    background: none;
-    border: 3px solid #8496ae;
-    border-radius: 10px;
-    background: #8496ae;
-    box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+  width: 15%;
+  margin-left: 1em;
+  background: none;
+  border: 3px solid #8496ae;
+  border-radius: 10px;
+  background: #8496ae;
+  box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }
 
 .show:hover {
-    box-shadow: 0 12px 16px 0 rgba(0, 0, 0, 0.24), 0 17px 50px 0 rgba(0, 0, 0, 0.19);
+  box-shadow: 0 12px 16px 0 rgba(0, 0, 0, 0.24), 0 17px 50px 0 rgba(0, 0, 0, 0.19);
 }
 
 .enter {
-    font-size: 24px;
-    cursor: pointer;
+  font-size: 30px;
+  cursor: pointer;
 }
 
 .reg {
-    font-style: italic;
-    color: rgb(87, 83, 83);
+  font-style: italic;
+  color: rgb(87, 83, 83);
 }
 
 .reg:hover {
-    text-decoration: underline;
+  text-decoration: underline;
 }
 
 a {
-    text-decoration: none;
+  text-decoration: none;
 }
 </style>
