@@ -90,6 +90,7 @@
 </template>
 
 <script>
+import axios from 'axios';
 import { defineComponent } from 'vue';
 
 export default defineComponent({
@@ -701,6 +702,7 @@ export default defineComponent({
       if (this.timerInterval) {
         clearInterval(this.timerInterval);
         this.timerInterval = null;
+        this.sendScoreToServer()
       }
     },
 
@@ -715,7 +717,21 @@ export default defineComponent({
         this.level = null;
       }, time);
     },
-
+    sendScoreToServer() {
+      axios.post('http://localhost:8000/api/user/update/score/', {
+        score: this.elapsedTime,
+      }, {
+        headers: {
+            'Authorization': `Token ${localStorage.getItem('token')}` // Используйте токен аутентификации
+        }
+      })
+      .then(response => {
+        console.log('Score sent successfully:', response.data);
+      })
+      .catch(error => {
+        console.error('Error sending score:', error);
+      });
+   },
     levels() {
       if (this.level) {
         return;
