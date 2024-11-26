@@ -28,20 +28,52 @@
         </div>
 
         <!-- Лазеры -->
-        <div
-          v-for="(laser, index) in lasers"
-          :key="laser.id"
-          class="laser"
-          :class="[{ active: laser.isActive }, laser.color]"
-          :style="{
-            top: laser.y + 'px',
-            left: laser.x + 'px',
-            width: laser.width + 'px',
-            height: laser.height + 'px',
-            transform: 'rotate(' + laser.angle + 'deg)',
-            'transform-origin': 'top left',
-          }"
-        ></div>
+        <template v-for="(laser, index) in lasers" :key="laser.id">
+          <!-- Для фиолетового лазера с отражениями -->
+          <div
+            v-if="laser.color === 'purple' && laser.isReflecting"
+            v-for="(segment, idx) in laser.path"
+            :key="idx"
+            class="laser"
+            :class="[{ active: laser.isActive }, laser.color]"
+            :style="{
+              top: segment.y + 'px',
+              left: segment.x + 'px',
+              width: segment.length + 'px',
+              height: laser.height + 'px',
+              transform: 'rotate(' + segment.angle + 'deg)',
+              'transform-origin': 'top left',
+            }"
+          ></div>
+          <!-- Для фиолетового лазера в фазе подготовки -->
+          <div
+            v-else-if="laser.color === 'purple'"
+            class="laser"
+            :class="[{ active: laser.isActive }, laser.color, 'preparing' ]"
+            :style="{
+              top: laser.y + 'px',
+              left: laser.x + 'px',
+              width: laser.width + 'px',
+              height: laser.height + 'px',
+              transform: 'rotate(' + laser.angle + 'deg)',
+              'transform-origin': 'top left',
+            }"
+          ></div>
+          <!-- Для других типов лазеров -->
+          <div
+            v-else
+            class="laser"
+            :class="[{ active: laser.isActive }, laser.color]"
+            :style="{
+              top: laser.y + 'px',
+              left: laser.x + 'px',
+              width: laser.width + 'px',
+              height: laser.height + 'px',
+              transform: 'rotate(' + laser.angle + 'deg)',
+              'transform-origin': 'top left',
+            }"
+          ></div>
+        </template>
       </div>
     </div>
 
@@ -56,6 +88,7 @@
     </div>
   </div>
 </template>
+
 <script>
 import { defineComponent } from 'vue';
 
@@ -80,8 +113,7 @@ export default defineComponent({
       dashCooldown: 1000, // Кулдаун рывка в миллисекундах
       dashDistance: 50, // Расстояние рывка
       isDashing: false, // Флаг для отображения эффекта рывка
-      dashIndicatorOpacity: 0.3, // Изначально полный
-      maxDashOpacity: 0.3, // Максимальная прозрачность
+      dashIndicatorOpacity: 0, // Прозрачность индикатора рывка
 
       startTime: null,
       elapsedTime: 0,
@@ -93,11 +125,101 @@ export default defineComponent({
     formattedTime() {
       const minutes = Math.floor(this.elapsedTime / 60000);
       const seconds = Math.floor((this.elapsedTime % 60000) / 1000);
-      const milliseconds = Math.floor((this.elapsedTime % 1000));
-      return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}:${String(milliseconds).padStart(2, "0")}`;
+      const milliseconds = Math.floor(this.elapsedTime % 1000);
+      return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}:${String(
+        milliseconds
+      ).padStart(3, '0')}`;
     },
   },
   methods: {
+    calculateLaserPath(x, y, angle, reflections) {
+      const path = [];
+      let currentX = x;
+      let currentY = y;
+      let currentAngle = angle;
+      const fieldWidth = 400;
+      const fieldHeight = 400;
+
+      for (let i = 0; i < reflections; i++) {
+        const rad = (Math.PI / 180) * currentAngle;
+        const cosTheta = Math.cos(rad);
+        const sinTheta = Math.sin(rad);
+        const tValues = [];
+
+        // Рассчитываем пересечения с границами
+        // Левая граница x=0
+        if (cosTheta !== 0) {
+          const t = (0 - currentX) / cosTheta;
+          if (t > 0) {
+            tValues.push({ t: t, edge: 'left' });
+          }
+        }
+        // Правая граница x=fieldWidth
+        if (cosTheta !== 0) {
+          const t = (fieldWidth - currentX) / cosTheta;
+          if (t > 0) {
+            tValues.push({ t: t, edge: 'right' });
+          }
+        }
+        // Верхняя граница y=0
+        if (sinTheta !== 0) {
+          const t = (0 - currentY) / sinTheta;
+          if (t > 0) {
+            tValues.push({ t: t, edge: 'top' });
+          }
+        }
+        // Нижняя граница y=fieldHeight
+        if (sinTheta !== 0) {
+          const t = (fieldHeight - currentY) / sinTheta;
+          if (t > 0) {
+            tValues.push({ t: t, edge: 'bottom' });
+          }
+        }
+
+        // Находим наименьшее положительное t
+        if (tValues.length === 0) {
+          break; // Лазер покинул пределы поля
+        }
+
+        tValues.sort((a, b) => a.t - b.t);
+        const { t: tMin, edge: hitEdge } = tValues[0];
+
+        const nextX = currentX + cosTheta * tMin;
+        const nextY = currentY + sinTheta * tMin;
+
+        path.push({
+          x: currentX,
+          y: currentY,
+          angle: currentAngle,
+          length: tMin,
+        });
+
+        // Обновляем позицию и угол для следующего сегмента
+        currentX = nextX;
+        currentY = nextY;
+
+        // Отражаем угол в зависимости от столкновения с границей
+        if (hitEdge === 'left' || hitEdge === 'right') {
+          currentAngle = 180 - currentAngle;
+        } else if (hitEdge === 'top' || hitEdge === 'bottom') {
+          currentAngle = -currentAngle;
+        }
+      }
+
+      return path;
+    },
+
+    // Метод для расчёта градиента прозрачности
+    calculateOpacityGradient(totalLength) {
+      const gradient = [];
+      const steps = 100; // Количество шагов в градиенте
+      for (let i = 0; i <= steps; i++) {
+        const opacity = 1 - i / steps;
+        gradient.push(opacity);
+      }
+      return gradient;
+    },
+
     handleKeyDown(event) {
       const key = event.key.toLowerCase();
       if (['w', 'a', 's', 'd', 'ц', 'ф', 'ы', 'в', 'shift'].includes(key)) {
@@ -165,7 +287,7 @@ export default defineComponent({
       const id = this.laserIdCounter++;
 
       // Случайный выбор типа лазера
-      const laserTypeRandom = Math.floor(Math.random()*array.length);
+      const laserTypeRandom = Math.floor(Math.random() * array.length);
       let laserType = array[laserTypeRandom];
 
       // Случайный выбор двух разных сторон для лазера
@@ -206,65 +328,134 @@ export default defineComponent({
         angle: angle,
         isActive: false,
         color: laserType,
+        reflectionsLeft: 4,
+        path: [],
       };
-
-      // Сохраняем начальные точки для синих лазеров
-      if (laserType === 'blue') {
-        laser.x0 = point1.x;
-        laser.y0 = point1.y;
-      }
 
       if (laserType === 'blue') {
         // Настройки для синих лазеров
+        laser.x0 = point1.x;
+        laser.y0 = point1.y;
         laser.rotationDirection = Math.random() < 0.5 ? -1 : 1; // -1 для влево, 1 для вправо
         laser.initialAngle = angle;
         laser.rotationAmount = laser.rotationDirection * 45; // Поворот на 45 градусов
         laser.finalAngle = laser.initialAngle + laser.rotationAmount;
         laser.rotationStartTime = Date.now();
         laser.rotationDuration = 3000; // Общее время вращения (1 секунда подготовки + 2 секунды огня)
+      } else if (laserType === 'green') {
+        // Настройки для зелёных лазеров
+        laser.creationTime = Date.now();
+        laser.isTracking = true; // Первую секунду следит за игроком
+        laser.trackingDuration = 1000; // 1 секунда
+        laser.preparationDuration = 2000; // 2 секунды подготовки
+        laser.isActive = false; // Станет активным после подготовки
+      } else if (laserType === 'purple') {
+        // Настройки для фиолетового лазера
+        laser.preparationTime = 2000; // 2 секунды подготовки
+        laser.activeTime = 1000; // 1 секунда активного состояния
+        laser.creationTime = Date.now();
+        laser.isReflecting = false;
+        laser.initialX = laser.x;
+        laser.initialY = laser.y;
+        laser.initialAngle = laser.angle;
+        laser.opacityGradient = this.calculateOpacityGradient(laser.width);
+        laser.isActive = false; // Лазер не активен в фазе подготовки
+        // Генерируем путь лазера сразу, включая отражения
+        laser.path = this.calculateLaserPath(
+          laser.x,
+          laser.y,
+          laser.angle,
+          laser.reflectionsLeft + 1 // +1, т.к. исходный лазер тоже считается
+        );
       }
 
       this.lasers.push(laser);
 
       // Настройка времени активации и длительности выстрела
-      const activationDelay = 1000; // 1 секунда
+      let activationDelay;
       let activeDuration;
       if (laserType === 'red') {
+        activationDelay = 1000; // 1 секунда
         activeDuration = 200; // Красный лазер активен 0.2 сек
       } else if (laserType === 'yellow') {
+        activationDelay = 1000; // 1 секунда
         activeDuration = 3000; // Жёлтый лазер активен 3 сек
       } else if (laserType === 'blue') {
-       activeDuration = 2000; // Синий лазер активен 2 сек
+        activationDelay = 1000; // 1 секунда
+        activeDuration = 2000; // Синий лазер активен 2 сек
+      } else if (laserType === 'green') {
+        activationDelay = 0; // Зеленый лазер сразу начинает подготовку
+        activeDuration = 200; // Зеленый лазер активен 0.2 сек после подготовки
       }
 
-      // Активация лазера после задержки
-      setTimeout(() => {
-        laser.isActive = true;
-
-        // Обработка коллизии во время активного состояния
-        const collisionInterval = setInterval(() => {
-          if (
-            this.circleIntersectsRotatedRect(
-              { x: this.playerX + this.collisionRadius, y: this.playerY + this.collisionRadius, r: this.collisionRadius },
-              laser
-            )
-          ) {
-            this.endGame();
-          }
-        }, 16); // Проверяем коллизию каждые 16мс (~60fps)
-
-        // Деактивация лазера после выстрела
+      if (laserType === 'green') {
+        // Для зелёного лазера используем особую логику
         setTimeout(() => {
-          laser.isActive = false;
+          laser.isActive = true; // Лазер выстреливает
 
-          clearInterval(collisionInterval);
+          // Обработка коллизии во время активного состояния
+          const collisionInterval = setInterval(() => {
+            if (
+              this.circleIntersectsRotatedRect(
+                {
+                  x: this.playerX + this.collisionRadius,
+                  y: this.playerY + this.collisionRadius,
+                  r: this.collisionRadius,
+                },
+                laser
+              )
+            ) {
+              this.endGame();
+            }
+          }, 16);
 
-          // Удаление лазера
+          // Деактивация лазера после выстрела
           setTimeout(() => {
-            this.lasers = this.lasers.filter((l) => l.id !== id);
-          }, 200);
-        }, activeDuration);
-      }, activationDelay);
+            laser.isActive = false;
+
+            clearInterval(collisionInterval);
+
+            // Удаление лазера
+            setTimeout(() => {
+              this.lasers = this.lasers.filter((l) => l.id !== id);
+            }, 200);
+          }, activeDuration);
+        }, laser.preparationDuration);
+      } else if (laserType !== 'purple') {
+        // Обычная логика для других лазеров (кроме фиолетового)
+        setTimeout(() => {
+          laser.isActive = true;
+
+          // Обработка коллизии во время активного состояния
+          const collisionInterval = setInterval(() => {
+            if (
+              this.circleIntersectsRotatedRect(
+                {
+                  x: this.playerX + this.collisionRadius,
+                  y: this.playerY + this.collisionRadius,
+                  r: this.collisionRadius,
+                },
+                laser
+              )
+            ) {
+              this.endGame();
+            }
+          }, 16); // Проверяем коллизию каждые 16мс (~60fps)
+
+          // Деактивация лазера после выстрела
+          setTimeout(() => {
+            laser.isActive = false;
+
+            clearInterval(collisionInterval);
+
+            // Удаление лазера
+            setTimeout(() => {
+              this.lasers = this.lasers.filter((l) => l.id !== id);
+            }, 200);
+          }, activeDuration);
+        }, activationDelay);
+      }
+      // Для фиолетового лазера обработка происходит в updateLasers
     },
 
     getRandomPointOnEdge(edge) {
@@ -336,24 +527,85 @@ export default defineComponent({
       const fieldHeight = 400;
 
       this.lasers.forEach((laser) => {
-        if (laser.color === 'blue') {
-          // Лазер синий, обновляем угол на протяжении всей жизни
-          const elapsed = now - laser.rotationStartTime;
-          const rotationDuration = laser.rotationDuration; // Общее время вращения (3 секунды)
+        if (laser.color === 'purple') {
+          const elapsed = now - laser.creationTime;
 
-          if (elapsed < rotationDuration) {
-            // Интерполируем угол
-            const t = elapsed / rotationDuration;
-            laser.angle = laser.initialAngle + laser.rotationAmount * t;
+          if (elapsed < laser.preparationTime) {
+            // Фаза подготовки
+            laser.isActive = false; // Лазер не активен (тёмный)
+            laser.isReflecting = false;
+            // Обновляем позицию и длину лазера на основе первого сегмента пути
+            const firstSegment = laser.path[0];
+            laser.x = firstSegment.x;
+            laser.y = firstSegment.y;
+            laser.angle = firstSegment.angle;
+            laser.width = firstSegment.length;
+          } else if (elapsed < laser.preparationTime + laser.activeTime) {
+            // Фаза активации
+            laser.isActive = true; // Лазер становится ярким
+            laser.isReflecting = true;
+
+            // Обработка коллизий во время активного состояния
+            laser.path.forEach((segment) => {
+              if (
+                this.circleIntersectsRotatedRect(
+                  {
+                    x: this.playerX + this.collisionRadius,
+                    y: this.playerY + this.collisionRadius,
+                    r: this.collisionRadius,
+                  },
+                  {
+                    x: segment.x,
+                    y: segment.y,
+                    width: segment.length,
+                    height: laser.height,
+                    angle: segment.angle,
+                  }
+                )
+              ) {
+                this.endGame();
+              }
+            });
           } else {
-            // Вращение завершено
-            laser.angle = laser.finalAngle;
+            // Лазер завершил свою работу
+            laser.isActive = false;
+            // Удаление лазера
+            this.lasers = this.lasers.filter((l) => l.id !== laser.id);
+          }
+        } else if (laser.color === 'blue' || laser.color === 'green') {
+          // Лазер синий или зелёный, обновляем угол и длину на протяжении всей жизни
+          if (laser.color === 'blue') {
+            // Существующая логика для синего лазера
+            const elapsed = now - laser.rotationStartTime;
+            const rotationDuration = laser.rotationDuration; // Общее время вращения
+
+            if (elapsed < rotationDuration) {
+              // Интерполируем угол
+              const t = elapsed / rotationDuration;
+              laser.angle = laser.initialAngle + laser.rotationAmount * t;
+            } else {
+              // Вращение завершено
+              laser.angle = laser.finalAngle;
+            }
+          } else if (laser.color === 'green') {
+            const elapsed = now - laser.creationTime;
+
+            if (elapsed < laser.trackingDuration) {
+              // Первую секунду лазер следит за игроком
+              const dx = this.playerX + this.playerRadius - laser.x;
+              const dy = this.playerY + this.playerRadius - laser.y;
+              laser.angle = Math.atan2(dy, dx) * (180 / Math.PI);
+            } else if (elapsed < laser.preparationDuration) {
+              // Вторую секунду лазер стоит на месте (ничего не делаем)
+            } else {
+              // Лазер выстреливает, обработка происходит в setTimeout внутри spawnLaser
+            }
           }
 
-          // Теперь обновляем позицию и длину лазера
+          // Теперь обновляем позицию и длину лазера для синего и зелёного лазеров
           const points = this.getLineRectangleIntersections(
-            laser.x0,
-            laser.y0,
+            laser.x,
+            laser.y,
             laser.angle,
             fieldWidth,
             fieldHeight
@@ -439,9 +691,8 @@ export default defineComponent({
 
       // Запуск таймера
       this.timerInterval = setInterval(() => {
-          this.elapsedTime = Date.now() - this.startTime;
+        this.elapsedTime = Date.now() - this.startTime;
       }, 10);
-
     },
     endGame() {
       this.isPlaying = false;
@@ -453,48 +704,48 @@ export default defineComponent({
       }
     },
 
-    spawnInterval(array,time,count) {
-        this.level = 1;
-        const interval = setInterval(() => {
-                this.spawnLaser(array);
-            }, time/count);
+    spawnInterval(array, time, count) {
+      this.level = 1;
+      const interval = setInterval(() => {
+        this.spawnLaser(array);
+      }, time / count);
 
-        setTimeout(() => {
-            clearInterval(interval);
-            this.level = null;
-        }, time);
+      setTimeout(() => {
+        clearInterval(interval);
+        this.level = null;
+      }, time);
     },
 
     levels() {
-        if (this.level){return;}
-        if (this.elapsedTime < 1000){
-            this.spawnInterval(['red'],1000,20);
-        } else if (this.elapsedTime > 2200 && this.elapsedTime < 3200) {
-            this.spawnInterval(['yellow'],1000,12);
-        } else if (this.elapsedTime > 7000 && this.elapsedTime < 8000) {
-            this.spawnInterval(['blue'],1000,7);
-        } else if (this.elapsedTime > 11000 && this.elapsedTime < 12000) {
-            this.spawnInterval(['red'],2800,10);
-            this.spawnInterval(['yellow'],1000,10);
-        } else if (this.elapsedTime > 16000 && this.elapsedTime < 17000) {
-            this.spawnInterval(['blue'],2000,5);
-            this.spawnInterval(['yellow'],1000,5);
-        } else if (this.elapsedTime > 21000 && this.elapsedTime < 22000) {
-            this.spawnInterval(['red'],2800,5);
-            this.spawnInterval(['yellow'],1000,5);
-            this.spawnInterval(['blue'],2000,5);
-        } else if (this.elapsedTime > 26000 && this.elapsedTime < 27000) {
-            this.spawnInterval(['red'],2800,15);
-            this.spawnInterval(['yellow'],1000,7);
-            this.spawnInterval(['blue'],2000,7);
-        } else if (this.elapsedTime > 30000 && this.elapsedTime < 31000) {
-            this.spawnInterval(['red','yellow','blue'],3000,10);
-        } else if (this.elapsedTime > 33000) {
-            this.level = 1;
-            const interval = setInterval(() => {
-                this.spawnLaser(['red','yellow','blue']);
-            }, 200);
-        }
+      if (this.level) {
+        return;
+      }
+
+      // Конфигурация уровней - ТУТ ИСПРАВИТЬ ЧТОБЫ И КРАСИВО БЫЛО (В ТАЙМИНГ) И СЛОЖНОТЬ НЕ ТАК ВОЗРОСЛА
+      const levelConfig = [
+        { start: 0, end: 3000, lasers: { red: 5 } },
+        { start: 5000, end: 7000, lasers: { yellow: 4 } },
+        { start: 10000, end: 13000, lasers: { blue: 3 } },
+        { start: 15000, end: 18000, lasers: { green: 2 } },
+        { start: 20000, end: 23000, lasers: { purple: 1 } },
+        { start: 25000, end: 28000, lasers: { red: 1, yellow: 1, blue: 1 } },
+        { start: 30000, end: 33000, lasers: { red: 1, yellow: 1, blue: 1, green: 1 } },
+        { start: 35000, end: Infinity, lasers: { red: 1, yellow: 1, blue: 1, green: 1, purple: 1 } },
+      ];
+
+      // Определяем текущий уровень на основе времени
+      const currentLevel = levelConfig.find(
+        (level) => this.elapsedTime >= level.start && this.elapsedTime < level.end
+      );
+
+      if (currentLevel) {
+        const laserCounts = currentLevel.lasers;
+
+        // Запускаем указанные типы лазеров с нужным количеством
+        Object.entries(laserCounts).forEach(([laserType, count]) => {
+          this.spawnInterval([laserType], 1000, count); // Интервал 1000 мс, можно подправить
+        });
+      }
     },
   },
   mounted() {
@@ -511,17 +762,23 @@ export default defineComponent({
         // Обновляем dashIndicatorOpacity
         const now = Date.now();
         const timeSinceLastDash = now - this.lastDashTime;
-        let opacity = timeSinceLastDash / this.dashCooldown;
-        opacity = Math.min(Math.max(opacity, 0), this.maxDashOpacity); // Ограничиваем от 0 до 1
-        this.dashIndicatorOpacity = opacity;
+
+        if (timeSinceLastDash < 700) {
+          this.dashIndicatorOpacity = 0;
+        } else if (timeSinceLastDash < this.dashCooldown) {
+          // Начинаем появляться за 300 мс до окончания кд
+          const t = (timeSinceLastDash - 700) / (this.dashCooldown - 700);
+          this.dashIndicatorOpacity = t * 0.1;
+        } else {
+          this.dashIndicatorOpacity = 0.1;
+        }
 
         requestAnimationFrame(gameLoop);
       }
     };
     gameLoop();
-
     this.levels();
-    setInterval(this.levels,10);
+    setInterval(this.levels, 10);
   },
   beforeUnmount() {
     window.removeEventListener('keydown', this.handleKeyDown);
@@ -571,8 +828,6 @@ export default defineComponent({
   height: 16px;
   background-color: white;
   border-radius: 50%;
-  top: 190px;
-  left: 190px;
 }
 
 .player.dashing {
@@ -581,11 +836,22 @@ export default defineComponent({
 
 @keyframes dashAura {
   0% {
-    box-shadow: 0 0 45px rgba(255, 255, 255, 0.9);
+    box-shadow: 0 0 30px rgba(255, 255, 255, 0.8);
   }
   100% {
     box-shadow: 0 0 0px rgba(255, 255, 255, 0);
   }
+}
+
+.dash-indicator {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border: 3px solid rgba(255, 255, 255, 0.5);
+  border-radius: 50%;
+  opacity: 0;
+  transition: opacity 0.3s linear;
 }
 
 .laser {
@@ -616,13 +882,24 @@ export default defineComponent({
 }
 
 .laser.blue {
-  background-color: rgba(0, 0, 255, 0.2);
-  box-shadow: 0 0 5px rgba(0, 0, 255, 0.3); /* Тусклое синее свечение */
+  background-color: rgba(64, 224, 208, 0.2);
+  box-shadow: 0 0 5px rgba(64, 224, 208, 0.3); /* Тусклое синее свечение */
 }
 
 .laser.blue.active {
-  background-color: rgba(0, 0, 255, 1);
-  box-shadow: 0 0 15px rgba(0, 0, 255, 0.8); /* Яркое синее свечение */
+  background-color: rgba(64, 224, 208, 1);
+  box-shadow: 0 0 15px rgba(64, 224, 208, 0.8); /* Яркое синее свечение */
+}
+
+/* Новый стиль для зелёного лазера */
+.laser.green {
+  background-color: rgba(0, 255, 0, 0.1); /* Едва видимый зелёный */
+  box-shadow: 0 0 5px rgba(0, 255, 0, 0.2);
+}
+
+.laser.green.active {
+  background-color: rgba(0, 255, 0, 1); /* Яркий зелёный при выстреле */
+  box-shadow: 0 0 15px rgba(0, 255, 0, 0.8);
 }
 
 .game-over {
@@ -658,15 +935,34 @@ export default defineComponent({
   outline: none;
 }
 
-.dash-indicator {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  border: 3px solid rgba(255, 255, 255, 0.5);
-  border-radius: 50%;
-  opacity: 0;
-  transition: opacity 0.1s;
+.laser.purple {
+  background-color: rgba(128, 0, 128, 0.1); /* Тёмный фиолетовый в фазе подготовки */
+  box-shadow: 0 0 5px rgba(128, 0, 128, 0.3);
 }
 
+.laser.purple.preparing {
+  background-image: linear-gradient(
+    to right,
+    rgba(128, 0, 128, 0.5) 0%,
+    rgba(128, 0, 128, 0) 100%
+  );
+  background-size: 10px 100%;
+  background-repeat: repeat;
+  background-position: 0 0;
+  animation: dashAnimation 1s linear infinite;
+}
+
+@keyframes dashAnimation {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: 20px 0;
+  }
+}
+
+.laser.purple.active {
+  background-color: rgba(128, 0, 128, 1); /* Яркий фиолетовый при выстреле */
+  box-shadow: 0 0 15px rgba(128, 0, 128, 0.8);
+}
 </style>
