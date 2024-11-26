@@ -15,7 +15,17 @@
             top: playerY + 'px',
             left: playerX + 'px',
           }"
-        ></div>
+        >
+          <!-- Индикатор рывка -->
+          <div
+            class="dash-indicator"
+            :style="{
+              width: dashDistance * 2 + 'px',
+              height: dashDistance * 2 + 'px',
+              opacity: dashIndicatorOpacity,
+            }"
+          ></div>
+        </div>
 
         <!-- Лазеры -->
         <div
@@ -59,8 +69,8 @@ export default defineComponent({
       playerX: 190,
       playerY: 190,
       playerSpeed: 3.5,
-      playerRadius: 8,
-      collisionRadius: 5, // Радиус для проверки коллизии - меньше персонажа для приятной игры
+      playerRadius: 6,
+      collisionRadius: 4, // Радиус для проверки коллизии - меньше персонажа для приятной игры
       keysPressed: {},
 
       lasers: [],
@@ -70,6 +80,8 @@ export default defineComponent({
       dashCooldown: 1000, // Кулдаун рывка в миллисекундах
       dashDistance: 50, // Расстояние рывка
       isDashing: false, // Флаг для отображения эффекта рывка
+      dashIndicatorOpacity: 0.3, // Изначально полный
+      maxDashOpacity: 0.3, // Максимальная прозрачность
 
       startTime: null,
       elapsedTime: 0,
@@ -83,8 +95,7 @@ export default defineComponent({
       const seconds = Math.floor((this.elapsedTime % 60000) / 1000);
       const milliseconds = Math.floor((this.elapsedTime % 1000));
       return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}:${String(milliseconds).padStart(2, "0")}`;
-  },
-
+    },
   },
   methods: {
     handleKeyDown(event) {
@@ -497,10 +508,18 @@ export default defineComponent({
         this.updateLasers();
         this.score++;
 
+        // Обновляем dashIndicatorOpacity
+        const now = Date.now();
+        const timeSinceLastDash = now - this.lastDashTime;
+        let opacity = timeSinceLastDash / this.dashCooldown;
+        opacity = Math.min(Math.max(opacity, 0), this.maxDashOpacity); // Ограничиваем от 0 до 1
+        this.dashIndicatorOpacity = opacity;
+
         requestAnimationFrame(gameLoop);
       }
     };
     gameLoop();
+
     this.levels();
     setInterval(this.levels,10);
   },
@@ -562,7 +581,7 @@ export default defineComponent({
 
 @keyframes dashAura {
   0% {
-    box-shadow: 0 0 30px rgba(255, 255, 255, 0.8);
+    box-shadow: 0 0 45px rgba(255, 255, 255, 0.9);
   }
   100% {
     box-shadow: 0 0 0px rgba(255, 255, 255, 0);
@@ -638,4 +657,16 @@ export default defineComponent({
 .btn:focus {
   outline: none;
 }
+
+.dash-indicator {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border: 3px solid rgba(255, 255, 255, 0.5);
+  border-radius: 50%;
+  opacity: 0;
+  transition: opacity 0.1s;
+}
+
 </style>
