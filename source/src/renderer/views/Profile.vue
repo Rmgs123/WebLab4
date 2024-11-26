@@ -1,40 +1,42 @@
 <template>
-    <div class="profile">
-        <div class="header">
-            Профиль
-        </div>
-        <div class="main-info">
-            <div class="profile-photo">
-                <img src="../assets/profile-avatar.png" class="avatar-photo">
-                <div class="profile-info">
-                    <div>
+    <div class="container">
+        <div class="profile">
+            <div class="header">
+                Profile
+            </div>
+            <div class="main-info">
+                <div class="profile-photo">
+                    <img src="../assets/profile-avatar.png" class="avatar-photo">
+                    <div class="profile-info">
                         <div>
-                            Ник
-                        </div>
-                        <div class="field" v-if="user">
-                            <div id="name">
-                                {{ user.username }}
+                            <div>
+                                Nickname:
+                            </div>
+                            <div class="field" v-if="user">
+                                <div id="name">
+                                    {{ user.username }}
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="scores" v-if="user">
-                <div>
-                    Ваш последний результат
+                <div class="scores" v-if="user">
+                    <div>
+                        Your last result:
+                    </div>
+                    <div>
+                        {{ formatTime(user.score) }}
+                    </div>
                 </div>
-                <div>
-                    {{ formatTime(user.score) }}
-                </div>
             </div>
+            <router-link to="/">
+                <div class="exit">
+                    <game-button>
+                        <span>Back</span>
+                    </game-button>
+                </div>
+            </router-link>
         </div>
-        <router-link to="/">
-            <div class="exit">
-                <game-button>
-                    Вернуться назад
-                </game-button>
-            </div>
-        </router-link>
     </div>
 </template>
 
@@ -82,20 +84,21 @@ export default defineComponent({
 </script>
 
 <style lang="css" scoped>
+    .container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        width: 100%;
+        margin: 0;
+    }
     .profile {
+        user-select: none;
         display: flex;
         flex-direction: column;
         width: 35%;
         color: #2f1e1e;
-        font-size: 22px;
-    }
-
-    .exit {
-        display: flex;
-        position: absolute;
-        justify-content: center;
-        width: 35%;
-        bottom: 2em;
+        font-size: 20px;
     }
 
     .avatar-photo {
@@ -128,17 +131,53 @@ export default defineComponent({
     }
 
     .header {
-        background-color: #060223;
-        font-size: 30px;
+        background: transparent;
+        font-size: 60px;
         text-align: center;
         padding: 20px;
         color: #7f9e9f;
         font-weight: 700;
+        animation: glow 4s infinite;
+    }
+
+    .exit {
+        width: auto;
+        display: flex;
+        justify-content: center;
+        margin-top: 20px;
     }
 
     .main-info {
         border-radius: 10px;
         background-color: #b8cece;
-        padding: 10px;
+        padding: 15px;
+        margin-left: auto;
+        margin-right: auto;
+        width: 300px;
+        height: auto;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+
+    span {
+        font-size: 40px;
+    }
+    a {
+        text-decoration: none;
+    }
+    @keyframes glow {
+        0%, 100% {
+            font-weight: 400;
+            color: #86b8ae; /* Цвет текста в начале и конце */
+            text-shadow: 0 0 3px #86b8ae, 0 0 7px #86b8ae, 0 0 18px #86b8ae;
+        }
+        50% {
+            font-weight: bold;
+            color: #68e3cb; /* Цвет текста в середине */
+            text-shadow: 0 0 15px #7ef2db, 0 0 20px #7ef2db, 0 0 2px #7ef2db;
+        }
     }
 </style>

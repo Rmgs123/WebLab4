@@ -1,5 +1,6 @@
 <template>
   <div class="login-form">
+    <div class="laser-background"></div>
     <div class="header">
       Authorization
     </div>
@@ -73,6 +74,26 @@ export default {
 </script>
 
 <style scoped lang="css">
+
+@keyframes flicker {
+    0%, 100% {
+        opacity: 0.05;
+    }
+    50% {
+        opacity: 0.3;
+    }
+}
+
+.laser-background {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(180deg, transparent, #7f9e9f, transparent, transparent);
+
+    animation: flicker 4s infinite alternate;
+    z-index: -1;
+}
+
 .login-form {
   display: flex;
   flex-direction: column;
@@ -88,6 +109,7 @@ export default {
   padding: 20px;
   color: #7f9e9f;
   font-weight: 900;
+  animation: glow 4s infinite;
 }
 
 .form {
@@ -144,10 +166,6 @@ input:focus {
   box-shadow: 0 12px 16px 0 rgba(0, 0, 0, 0.24), 0 17px 50px 0 rgba(0, 0, 0, 0.19);
 }
 
-.enter {
-  font-size: 30px;
-}
-
 .reg {
   font-style: italic;
   color: rgb(87, 83, 83);
@@ -165,16 +183,17 @@ a {
   margin-top: 20px;
 }
 
-.back-btn {
-  color: #9dd5ca;
-  font-size: 30px;
-  padding: 10px 20px;
-  background: transparent;
-  border: none;
-  transition: text-shadow 0.3s;
+@keyframes glow {
+    0%, 100% {
+        font-weight: 400;
+        color: #86b8ae; /* Цвет текста в начале и конце */
+        text-shadow: 0 0 3px #86b8ae, 0 0 7px #86b8ae, 0 0 18px #86b8ae;
+    }
+    50% {
+        font-weight: bold;
+        color: #68e3cb; /* Цвет текста в середине */
+        text-shadow: 0 0 15px #7ef2db, 0 0 20px #7ef2db, 0 0 2px #7ef2db;
+    }
 }
 
-.back-btn:hover {
-  text-shadow: 0 0 25px #c3dcd5;
-}
 </style>

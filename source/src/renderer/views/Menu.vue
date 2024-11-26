@@ -1,7 +1,8 @@
 <template>
   <div class="menu">
+     <div class="laser-background"></div>
     <div class="header">
-      Menu
+      Laser Run
     </div>
     <div class="buttons">
       <router-link to="/game">
@@ -75,9 +76,32 @@ export default defineComponent({
 </script>
 
 <style lang="css" scoped>
+@keyframes flicker {
+    0%, 100% {
+        opacity: 0.14;
+    }
+    50% {
+        opacity: 0.4;
+    }
+}
+
+.laser-background {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to right, transparent, #7f9e9f, transparent),
+                linear-gradient(to bottom, transparent, #7f9e9f, transparent);
+    animation: flicker 4.2s infinite alternate;
+    z-index: -1;
+}
 .menu {
-  display: flex;
-  flex-direction: column;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    width: 100%;
+    margin: 0;
 }
 
 .leftSide {
@@ -112,24 +136,39 @@ export default defineComponent({
 }
 
 .exit {
-  background: transparent;
-  position: absolute;
-  bottom: 2em;
+  margin-top: 1em;
+  position: static;
+  width: 100%;
+  display: flex;
+  justify-content: center;
 }
 
 .btns {
   width: 9em;
-  font-size: 5cqmin;
-  margin-bottom: 0.5em;
+  font-size: 29px;
+  margin-bottom: 10px;
 }
 
 .header {
   user-select: none;
-  font-size: 80px;
+  font-size: 100px;
   text-align: center;
   padding: 20px;
-  margin-top: 40px;
   color: #7f9e9f;
   font-weight: 900;
+  animation: glow 4.2s infinite;
 }
+
+@keyframes glow {
+        0%, 100% {
+            font-weight: 400;
+            color: #86b8ae; /* Цвет текста в начале и конце */
+            text-shadow: 0 0 3px #86b8ae, 0 0 7px #86b8ae, 0 0 18px #86b8ae;
+        }
+        50% {
+            font-weight: bold;
+            color: #68e3cb; /* Цвет текста в середине */
+            text-shadow: 0 0 25px #7ef2db, 0 0 25px #7ef2db, 0 0 2px #7ef2db;
+        }
+    }
 </style>

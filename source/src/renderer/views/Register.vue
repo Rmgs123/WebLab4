@@ -69,6 +69,7 @@ export default {
 
 <style scoped lang="css">
 .register {
+  user-select: none;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -83,6 +84,7 @@ export default {
   padding: 20px;
   color: #7f9e9f;
   font-weight: 900;
+  animation: glow 4s infinite;
 }
 
 .form {
@@ -156,5 +158,18 @@ input:focus {
 
 a {
   text-decoration: none;
+}
+
+@keyframes glow {
+    0%, 100% {
+        font-weight: 400;
+        color: #86b8ae; /* Цвет текста в начале и конце */
+        text-shadow: 0 0 3px #86b8ae, 0 0 7px #86b8ae, 0 0 18px #86b8ae;
+    }
+    50% {
+        font-weight: bold;
+        color: #68e3cb; /* Цвет текста в середине */
+        text-shadow: 0 0 15px #7ef2db, 0 0 20px #7ef2db, 0 0 2px #7ef2db;
+    }
 }
 </style>
