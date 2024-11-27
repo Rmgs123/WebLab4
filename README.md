@@ -17,6 +17,6 @@ The local server must be run separately, detailed information is available in th
 ![image](https://github.com/user-attachments/assets/2c37c6de-d379-459b-a86b-f75c2d959d16)
 ![image](https://github.com/user-attachments/assets/e102a040-b3e9-4200-8101-840f51aadf6e)
 ![image](https://github.com/user-attachments/assets/d11ba29b-e7ee-48ee-900c-ab32515c97f2)
-![image](https://github.com/user-attachments/assets/eb4404f7-fd41-4f02-b0b1-c3a8e67066ec)
+![image](https://github.com/user-attachments/assets/76f315d3-c8ae-4eeb-9cfc-a6658f0cd11d)
 ![image](https://github.com/user-attachments/assets/87837e99-80f8-44fd-8afd-bfb16e319af8)
 ![image](https://github.com/user-attachments/assets/174239eb-4fa5-4e02-83fd-e8e99fa4a02a)
