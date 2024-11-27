@@ -22,7 +22,7 @@
                 </div>
                 <div class="scores" v-if="user">
                     <div>
-                        Your last result:
+                        Your best result:
                     </div>
                     <div>
                         {{ formatTime(user.score) }}
