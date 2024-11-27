@@ -60,3 +60,7 @@ def update_score(request):
         user.save()
         return Response({"status": "success", "score": user.score}, status=status.HTTP_200_OK)
     return Response({"error": "Score is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+

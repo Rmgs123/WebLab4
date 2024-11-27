@@ -1,0 +1,16 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\build",
+    "\\build\\main",
+    "\\scripts",
+    "\\src",
+    "\\src\\renderer",
+    "\\src\\renderer\\components",
+    "\\src\\renderer\\public",
+    "\\src\\renderer\\typings",
+    "\\src\\renderer\\views"
+  ],
+  "SelectedNode": "\\src\\renderer\\typings\\User.ts",
+  "PreviewInSolutionExplorer": false
+}
