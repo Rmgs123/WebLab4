@@ -2,7 +2,7 @@
 
 ### Create virtual environment
 ```bash
-virtualenv venv
+python -m venv venv
 ```
 ### Start virtual environment
 ```bash
