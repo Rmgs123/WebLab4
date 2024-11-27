@@ -1,18 +1,18 @@
-<div align="center"> 
+## Commands for developing:
 
-### Install libraries:
+### Install libraries
 
 ```bash
 npm install
 ```
 
-### Start developing:
+### Start developing
 
 ```bash
 npm run dev
 ```
 
-### *Additional Commands:
+### *Additional Commands
 
 ```bash
 npm run dev # starts application with hot reload
