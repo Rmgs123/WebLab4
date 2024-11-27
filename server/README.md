@@ -1,18 +1,18 @@
-## Команды для запуска сервера:
+## Commands for starting the server:
 
-### Cоздание виртуального окружения
+### Create virtual environment
 ```bash
 virtualenv venv
 ```
-### Запуск виртуальнйо среды
+### Start virtual environment
 ```bash
 venv\Scripts\activate
 ```
-### Установка библиотек
+### Install all libraries
 ```bash
 pip install -r requirements.txt
 ```
-### Запуск сервера
+### Start the server
 ```bash
 python manage.py runserver
 ```
