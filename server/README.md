@@ -1,7 +1,18 @@
-# Порядок команд:
-# virtualenv venv - для создания виртуального окружения
-# venv\Scripts\activate - (для захода в нее)
-#...
-# pip install -r requirements.txt - для установки библиотек
-# python manage.py runserver - для запуска сервера
+## Команды для запуска сервера:
 
+### Cоздание виртуального окружения
+```bash
+virtualenv venv
+```
+### Запуск виртуальнйо среды
+```bash
+venv\Scripts\activate
+```
+### Установка библиотек
+```bash
+pip install -r requirements.txt
+```
+### Запуск сервера
+```bash
+python manage.py runserver
+```
