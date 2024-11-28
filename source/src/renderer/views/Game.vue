@@ -123,9 +123,24 @@
                 startTime: null,
                 elapsedTime: 0,
                 timerInterval: null,
-                level: null,
                 musicInterval: null,
                 audio: new Audio('../assets/musicunder.mp3'),
+                isLevel: null,
+                level: null,
+                levelsSettings: [
+                [['red']],[1000],[2],[10],
+                [['orange']],[1000],[2],[5],
+                [['yellow']],[1000],[5],[10],
+                [['green']],[1000],[2],[10],
+                [['blue']],[1000],[2],[5],
+                [['cyan']],[1000],[2],[5],
+                [['red'],['green']],[2000,1000],[2,2],[7,5],
+                [['yellow'],['orange']],[1000,2000],[3,1],[9,4],
+                [['blue'],['cyan']],[1000,1000],[2,2],[3,3],
+                [['green'],['cyan'],['orange']],[1800,1000,1000],[2,1,1],[3,2,2],
+                [['red'],['yellow']],[3800,1000],[3,9],[9,13],
+                [['red','orange','yellow','green','blue','cyan']],[1000],[10],[12],
+                ],
             };
         },
         computed: {
@@ -257,7 +272,7 @@
               }
 
               // Рывок
-              const now = Date.now();
+              const now = performance.now();
               if (
                 this.keysPressed['shift'] &&
                 (dx !== 0 || dy !== 0) &&
@@ -293,6 +308,7 @@
               }
             },
             spawnLaser(array) {
+              this.isLevel += 1;
               const id = this.laserIdCounter++;
 
               // Случайный выбор типа лазера
@@ -348,18 +364,18 @@
                 laser.x0 = point1.x;
                 laser.y0 = point1.y;
                 laser.direction = edge1%2===0 ? 0 : 1;
-                laser.creationTime = Date.now();
+                laser.creationTime = performance.now();
                 laser.duration = 3000;
-                laser.movement = 1;
+                laser.movement = 0.75;
               } else if (laserType === 'blue') {
                 // Настройки для синих лазеров
                 laser.x0 = point1.x;
                 laser.y0 = point1.y;
                 laser.rotationDirection = Math.random() < 0.5 ? -1 : 1; // -1 для влево, 1 для вправо
                 laser.initialAngle = angle;
-                laser.rotationAmount = laser.rotationDirection * 45; // Поворот на 45 градусов
+                laser.rotationAmount = laser.rotationDirection * 30; // Поворот на 45 градусов
                 laser.finalAngle = laser.initialAngle + laser.rotationAmount;
-                laser.rotationStartTime = Date.now();
+                laser.rotationStartTime = performance.now();
                 laser.rotationDuration = 3000; // Общее время вращения (1 секунда подготовки + 2 секунды огня)
               } else if (laserType === 'cyan') {
                 // Настройки для синих лазеров
@@ -367,13 +383,13 @@
                 laser.y0 = point1.y;
                 laser.rotationDirection = Math.random() < 0.5 ? -1 : 1; // -1 для влево, 1 для вправо
                 laser.initialAngle = angle;
-                laser.rotationAmount = laser.rotationDirection * 45; // Поворот на 45 градусов
+                laser.rotationAmount = laser.rotationDirection * 30; // Поворот на 45 градусов
                 laser.finalAngle = laser.initialAngle + laser.rotationAmount;
-                laser.rotationStartTime = Date.now();
+                laser.rotationStartTime = performance.now();
                 laser.rotationDuration = 3000;
               }else if (laserType === 'green') {
                 // Настройки для зелёных лазеров
-                laser.creationTime = Date.now();
+                laser.creationTime = performance.now();
                 laser.isTracking = true; // Первую секунду следит за игроком
                 laser.trackingDuration = 1000; // 1 секунда
                 laser.preparationDuration = 2000; // 2 секунды подготовки
@@ -382,7 +398,7 @@
                 // Настройки для фиолетового лазера
                 laser.preparationTime = 2000; // 2 секунды подготовки
                 laser.activeTime = 1000; // 1 секунда активного состояния
-                laser.creationTime = Date.now();
+                laser.creationTime = performance.now();
                 laser.isReflecting = false;
                 laser.initialX = laser.x;
                 laser.initialY = laser.y;
@@ -450,7 +466,7 @@
 
 
                     clearInterval(collisionInterval);
-
+                    this.isLevel -= 1;
                     // Удаление лазера
                     setTimeout(() => {
                       this.lasers = this.lasers.filter((l) => l.id !== id);
@@ -524,7 +540,7 @@
             },
 
             updateLasers() {
-              const now = Date.now();
+              const now = performance.now();
               const fieldWidth = 400;
               const fieldHeight = 400;
 
@@ -712,12 +728,12 @@
                 }, 156000);//время музыки
 
                 this.isPlaying = true;
-                this.startTime = Date.now();
+                this.startTime = performance.now();
                 this.elapsedTime = 0;
 
                 // Запуск таймера
                 this.timerInterval = setInterval(() => {
-                    this.elapsedTime = Date.now() - this.startTime;
+                    this.elapsedTime = performance.now() - this.startTime;
                 }, 10);
             },
             endGame() {
@@ -739,7 +755,7 @@
             },
 
             spawnInterval(array, time, count) {
-              this.level += 1;
+              this.isLevel += 1;
               const interval = setInterval(() => {
                 this.spawnLaser(array);
 
@@ -747,7 +763,7 @@
 
               setTimeout(() => {
                 clearInterval(interval);
-                this.level -=1;
+                this.isLevel -=1;
               }, time);
             },
 
@@ -775,62 +791,24 @@
             },
 
             levels() {
-                if (this.level){return;}
+                let levelNumber = this.level*4;
+                if (this.isLevel){return;}
 
-                if (this.elapsedTime < 1000){
-                    this.spawnInterval(['red'],1000,20);
-                } else if (this.elapsedTime > 2200 && this.elapsedTime < 3200) {
-                    this.spawnInterval(['orange'],1000,10);
-                } else if (this.elapsedTime > 7000 && this.elapsedTime < 8000) {
-                    this.spawnInterval(['yellow'],1000,20);
-                } else if (this.elapsedTime > 13000 && this.elapsedTime < 14000) {
-                    this.spawnInterval(['green'],1000,10);
-                } else if (this.elapsedTime > 16200 && this.elapsedTime < 17200) {
-                    this.spawnInterval(['blue'],1000,7);
-                } else if (this.elapsedTime > 21000 && this.elapsedTime < 22000) {
-                    this.spawnInterval(['cyan'],1000,7);
-                } else if (this.elapsedTime > 25000 && this.elapsedTime < 26000) {
-                    this.spawnInterval(['purple'],1000,2);
+                let count = 0;
 
-                } else if (this.elapsedTime > 29000 && this.elapsedTime < 30000) {
-                    this.spawnInterval(['red'],2000,10);
-                    this.spawnInterval(['green'],1000,10);
-                } else if (this.elapsedTime > 32200 && this.elapsedTime < 33200) {
-                    this.spawnInterval(['red'],2800,10);
-                    this.spawnInterval(['orange'],1000,5);
-                } else if (this.elapsedTime > 37000 && this.elapsedTime < 38000) {
-                    this.spawnInterval(['cyan'],1000,3);
-                    this.spawnInterval(['green'],1800,10);
-                } else if (this.elapsedTime > 42000 && this.elapsedTime < 43000) {
-                    this.spawnInterval(['red'],2800,12);
-                    this.spawnInterval(['blue'],1000,7);
-                } else if (this.elapsedTime > 47000 && this.elapsedTime < 48000) {
-                    this.spawnInterval(['yellow'],1000,20);
-                    this.spawnInterval(['green'],2800,5);
-                } else if (this.elapsedTime > 53000 && this.elapsedTime < 54000) {
-                    this.spawnInterval(['blue'],1000,5);
-                    this.spawnInterval(['orange'],1000,5);
-                } else if (this.elapsedTime > 58000 && this.elapsedTime < 59000) {
-                    this.spawnInterval(['yellow'],1000,5);
-                    this.spawnInterval(['cyan'],2000,5);
-                } else if (this.elapsedTime > 63000 && this.elapsedTime < 64000) {
-                    this.spawnInterval(['yellow'],1000,10);
-                    this.spawnInterval(['red'],3800,10);
-                    this.spawnInterval(['blue'],2000,5);
-                }else if (this.elapsedTime > 69000 && this.elapsedTime < 70000) {
-                    this.spawnInterval(['cyan'],1000,5);
-                    this.spawnInterval(['green'],1800,5);
-                    this.spawnInterval(['blue'],1000,5);
-                } else if (this.elapsedTime > 74000 && this.elapsedTime < 120000) {
-                    this.spawnInterval(['red'],10000,10);
-                    this.spawnInterval(['orange'],10000,7);
-                    this.spawnInterval(['yellow'],10000,5);
-                    this.spawnInterval(['green'],10000,10);
-                    this.spawnInterval(['blue'],10000,5);
-                    this.spawnInterval(['cyan'],10000,5);
-                    this.spawnInterval(['purple'],10000,1);
-                } else if (this.elapsedTime > 120000) {
-                    this.spawnInterval(['purple'],1000,10);
+                for (let index=0;index<this.levelsSettings[levelNumber].length; index+=1){
+                    this.spawnInterval(this.levelsSettings[levelNumber][index],
+                    this.levelsSettings[levelNumber+1][index],this.levelsSettings[levelNumber+2][index]);
+
+                    if (this.levelsSettings[levelNumber+2][index] >= this.levelsSettings[levelNumber+3][index]){
+                        count+=1;
+                    } else {
+                        this.levelsSettings[levelNumber+2][index]+=2;
+                    }
+                }
+
+                if (count === this.levelsSettings[levelNumber].length && levelNumber+4 != this.levelsSettings.length){
+                    this.level+=1;
                 }
             },
           },
@@ -851,35 +829,45 @@
             .catch((e) => {
                 console.log("Ошибка при получении данных:", e);
             });
+
+        const FPS = 60;
+        const FRAME_TIME = 1000/FPS;
+        let lastFrameTime = performance.now();
         this.startGame();
 
 
-        const gameLoop = () => {
-          this.updateLasers();
+        const gameLoop = (currentTime) => {
+          const delta = currentTime-lastFrameTime;
 
+          if (delta>=FRAME_TIME){
+              this.updateLasers();
+
+              if (this.isPlaying) {
+                this.movePlayer();
+                this.updateLasers();
+
+
+                // Обновляем dashIndicatorOpacity
+                const now = performance.now();
+                const timeSinceLastDash = now - this.lastDashTime;
+
+                if (timeSinceLastDash < 700) {
+                  this.dashIndicatorOpacity = 0;
+                } else if (timeSinceLastDash < this.dashCooldown) {
+                  // Начинаем появляться за 300 мс до окончания кд
+                  const t = (timeSinceLastDash - 700) / (this.dashCooldown - 700);
+                  this.dashIndicatorOpacity = t * 0.1;
+                } else {
+                  this.dashIndicatorOpacity = 0.1;
+                }
+              }
+          }
           if (this.isPlaying) {
-            this.movePlayer();
-            this.updateLasers();
-
-
-            // Обновляем dashIndicatorOpacity
-            const now = Date.now();
-            const timeSinceLastDash = now - this.lastDashTime;
-
-            if (timeSinceLastDash < 700) {
-              this.dashIndicatorOpacity = 0;
-            } else if (timeSinceLastDash < this.dashCooldown) {
-              // Начинаем появляться за 300 мс до окончания кд
-              const t = (timeSinceLastDash - 700) / (this.dashCooldown - 700);
-              this.dashIndicatorOpacity = t * 0.1;
-            } else {
-              this.dashIndicatorOpacity = 0.1;
-            }
-
             requestAnimationFrame(gameLoop);
           }
         };
-        gameLoop();
+
+        requestAnimationFrame(gameLoop);
         this.levels();
         setInterval(this.levels, 100);
       },
