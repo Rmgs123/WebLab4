@@ -43,6 +43,10 @@
       </div>
     </div>
   </div>
+  <div class="hotkeys">
+    "CTRL +" or "CTRL -" for resizing<br>
+    F11 -  fullscreen
+  </div>
 </template>
 
 <script lang="ts">
@@ -157,6 +161,17 @@ export default defineComponent({
   color: #7f9e9f;
   font-weight: 900;
   animation: glow 4.2s infinite;
+}
+
+.hotkeys {
+
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  color: #ffffff;
+  font-size: 14px;
+  opacity: 0.5;
+  user-select: none;
 }
 
 @keyframes glow {

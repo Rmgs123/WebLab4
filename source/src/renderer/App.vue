@@ -1,5 +1,42 @@
 <script setup lang="ts">
+import { onMounted, onBeforeUnmount } from 'vue';
+
+let currentZoomFactor = 1;
+
+function handleKeyDown(event: KeyboardEvent) {
+  const isCtrlOrCmd = event.ctrlKey || event.metaKey;
+  if (isCtrlOrCmd) {
+    if (event.key === '=' || event.key === '+') {
+      event.preventDefault();
+      currentZoomFactor = Math.min(1.8, currentZoomFactor + 0.2);
+      window.electronAPI.setZoomFactor(currentZoomFactor);
+    } else if (event.key === '-') {
+      event.preventDefault();
+      currentZoomFactor = Math.max(0.5, currentZoomFactor - 0.2);
+      window.electronAPI.setZoomFactor(currentZoomFactor);
+    } else if (event.key === '0') {
+      event.preventDefault();
+      currentZoomFactor = 1;
+      window.electronAPI.setZoomFactor(currentZoomFactor);
+    }
+  }
+
+  // Добавляем обработку клавиши F11 для переключения полноэкранного режима
+  if (event.key === 'F11') {
+    event.preventDefault();
+    window.electronAPI.toggleFullScreen();
+  }
+}
+
+onMounted(() => {
+  window.addEventListener('keydown', handleKeyDown);
+});
+
+onBeforeUnmount(() => {
+  window.removeEventListener('keydown', handleKeyDown);
+});
 </script>
+
 
 <template>
   <router-view>
@@ -15,11 +52,39 @@
     font-family: "Orbitron", sans-serif;
     background-color: #000;
     color: #7f9e9f;
+    scrollbar-width: thin;
+    scrollbar-color: #3a3a3a #1e1e1e;
   }
 
   #app {
     display: flex;
     justify-content: center;
     align-items: center;
+  }
+
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: #1e1e1e;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: rgba(58, 58, 58, 0.5);
+    border-radius: 3px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #5a5a5a;
+  }
+
+  ::-webkit-scrollbar-button {
+    display: none;
+  }
+
+  ::-webkit-scrollbar-corner {
+    background: transparent;
   }
 </style>
