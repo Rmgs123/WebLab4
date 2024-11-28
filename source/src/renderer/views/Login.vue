@@ -98,8 +98,9 @@ export default {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  align-items: center; /* Центрируем по горизонтали */
-  height: 100vh; /* Занимаем всю высоту экрана */
+  align-items: center;
+  height: 100vh;
+  user-select: none;
 }
 
 .header {

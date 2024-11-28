@@ -905,6 +905,7 @@
   align-items: center;
   justify-content: center;
   color: white;
+  user-select: none;
 }
 
 .game {
