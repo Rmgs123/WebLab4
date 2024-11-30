@@ -106,6 +106,7 @@
                 playerX: 190,
                 playerY: 190,
                 playerSpeed: 5,
+                playerSpeedMultiplier: 0.2,
                 playerRadius: 6,
                 collisionRadius: 4, // Радиус для проверки коллизии - меньше персонажа для приятной игры
                 keysPressed: {},
@@ -844,7 +845,7 @@
               this.updateLasers();
 
               if (this.isPlaying) {
-                this.playerSpeed = delta*0.2;
+                this.playerSpeed = delta*this.playerSpeedMultiplier;
                 this.movePlayer();
                 this.updateLasers();
 
