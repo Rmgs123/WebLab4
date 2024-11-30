@@ -105,7 +105,7 @@
 
                 playerX: 190,
                 playerY: 190,
-                playerSpeed: 3.5,
+                playerSpeed: 10,
                 playerRadius: 6,
                 collisionRadius: 4, // Радиус для проверки коллизии - меньше персонажа для приятной игры
                 keysPressed: {},
@@ -792,7 +792,7 @@
 
             levels() {
                 let levelNumber = this.level*4;
-                if (this.isLevel){return;}
+                if (this.isLevel || !this.isPlaying){return;}
 
                 let count = 0;
 
@@ -840,6 +840,7 @@
           const delta = currentTime-lastFrameTime;
 
           if (delta>=FRAME_TIME){
+              lastFrameTime = currentTime;
               this.updateLasers();
 
               if (this.isPlaying) {
