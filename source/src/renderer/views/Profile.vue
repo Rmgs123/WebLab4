@@ -98,7 +98,7 @@ export default defineComponent({
         flex-direction: column;
         width: 35%;
         color: #2f1e1e;
-        font-size: 20px;
+        font-size: clamp(10px, 3vw, 20px);
     }
 
     .avatar-photo {
@@ -132,7 +132,7 @@ export default defineComponent({
 
     .header {
         background: transparent;
-        font-size: 60px;
+        font-size: clamp(20px, 8vw, 60px);
         text-align: center;
         padding: 20px;
         color: #7f9e9f;
@@ -153,7 +153,7 @@ export default defineComponent({
         padding: 15px;
         margin-left: auto;
         margin-right: auto;
-        width: 300px;
+        width: clamp(100px, 40vw, 300px);
         height: auto;
         box-sizing: border-box;
         display: flex;
@@ -163,7 +163,7 @@ export default defineComponent({
     }
 
     span {
-        font-size: 40px;
+        font-size: clamp(20px, 4vw, 40px);
     }
     a {
         text-decoration: none;

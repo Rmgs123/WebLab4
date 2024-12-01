@@ -8,7 +8,7 @@ function handleKeyDown(event: KeyboardEvent) {
   if (isCtrlOrCmd) {
     if (event.key === '=' || event.key === '+') {
       event.preventDefault();
-      currentZoomFactor = Math.min(1.8, currentZoomFactor + 0.2);
+      currentZoomFactor = Math.min(1.5, currentZoomFactor + 0.2);
       window.electronAPI.setZoomFactor(currentZoomFactor);
     } else if (event.key === '-') {
       event.preventDefault();
@@ -21,7 +21,6 @@ function handleKeyDown(event: KeyboardEvent) {
     }
   }
 
-  // Добавляем обработку клавиши F11 для переключения полноэкранного режима
   if (event.key === 'F11') {
     event.preventDefault();
     window.electronAPI.toggleFullScreen();

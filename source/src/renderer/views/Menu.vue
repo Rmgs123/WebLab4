@@ -34,7 +34,7 @@
           </game-button>
         </router-link>
       </div>
-      <div class="exit">
+      <div v-if="isAuth" class="exit">
         <router-link to="/login">
           <game-button class="btns" @click="handleExit">
             Logout
@@ -105,7 +105,9 @@ export default defineComponent({
     align-items: center;
     height: 100vh;
     width: 100%;
+    padding: 2em;
     margin: 0;
+    box-sizing: border-box;
 }
 
 .leftSide {
@@ -149,13 +151,13 @@ export default defineComponent({
 
 .btns {
   width: 9em;
-  font-size: 29px;
+  font-size: clamp(10px, 3vw, 29px);
   margin-bottom: 10px;
 }
 
 .header {
   user-select: none;
-  font-size: 100px;
+  font-size: clamp(40px, 10vw, 100px);
   text-align: center;
   padding: 20px;
   color: #7f9e9f;
@@ -164,12 +166,11 @@ export default defineComponent({
 }
 
 .hotkeys {
-
   position: absolute;
   bottom: 10px;
   right: 10px;
   color: #ffffff;
-  font-size: 14px;
+  font-size: clamp(10px, 2vw, 14px);;
   opacity: 0.5;
   user-select: none;
 }

@@ -79,7 +79,7 @@ export default {
 
 .header {
   background: transparent;
-  font-size: 60px;
+  font-size:  clamp(20px, 15vw, 60px);
   text-align: center;
   padding: 20px;
   color: #7f9e9f;
@@ -110,7 +110,7 @@ input {
   background: none;
   border: 1px solid #637081;
   border-radius: 10px;
-  font-size: 20px;
+  font-size: clamp(10px, 3vw, 25px);
   font-family: 'Comfortaa', sans-serif;
   transition: box-shadow 0.17s ease-in-out;
 }
@@ -143,7 +143,7 @@ input:focus {
 }
 
 .enter {
-  font-size: 30px;
+  font-size: clamp(20px, 3vw, 30px);
   cursor: pointer;
 }
 

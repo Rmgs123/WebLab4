@@ -75,7 +75,7 @@ export default defineComponent({
         background: transparent;
         padding: 10px;
         text-align: center; 
-        font-size: 80px;
+        font-size: clamp(20px, 13vw, 80px);
         font-weight: 100;
         margin-bottom: 20px;
         animation: glow 2.5s infinite;

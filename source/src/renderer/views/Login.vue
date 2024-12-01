@@ -105,7 +105,7 @@ export default {
 
 .header {
   background: transparent;
-  font-size: 60px;
+  font-size: clamp(20px, 15vw, 60px);
   text-align: center;
   padding: 20px;
   color: #7f9e9f;
@@ -135,7 +135,7 @@ input {
   background: none;
   border: 1px solid #637081;
   border-radius: 10px;
-  font-size: 20px;
+  font-size: clamp(10px, 3vw, 20px);
   font-family: 'Comfortaa', sans-serif;
   transition: box-shadow 0.17s ease-in-out;
 }
@@ -195,6 +195,11 @@ a {
         color: #68e3cb; /* Цвет текста в середине */
         text-shadow: 0 0 15px #7ef2db, 0 0 20px #7ef2db, 0 0 2px #7ef2db;
     }
+}
+
+.enter,
+ .back-btn{
+  font-size: clamp(20px, 3vw, 30px)
 }
 
 </style>
