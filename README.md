@@ -4,11 +4,11 @@ This is a web application development project that is based on _Vue_ and _Electr
 ## **Our Idea:**
 We made a game in the **Bullet Hell** genre.  The main idea for the gameplay is the generation of "lasers" with different patterns of hanging
 
-## **Current Functionality (~10 code commits):**
+## **Current Functionality (~15 main code commits):**
 - Registration and Login
 - Main Gameplay
 - Leaderboard
--Viewing a Profile
+- Viewing a Profile
 
 ## **development features**
 The local server must be run separately, detailed information is available in the README at /server/
