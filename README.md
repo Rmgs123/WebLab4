@@ -2,7 +2,7 @@
 This is a web application development project that is based on _Vue_ and _Electron_ using JavaScript. Django REST Framework (DRF) was used to provide a secure and easy-to-maintain backend. The interface uses HTML5, CSS3 and JavaScript. The application follows best practices, including clear separation of tasks, modular design and version control using Git, creating a reliable and scalable framework for web development. 🚀
 
 ## **Our Idea:**
-We made a game in the **Bullet Hell** genre.  The main idea for the gameplay is the generation of "lasers" with different patterns of hanging
+We made a game in the **Bullet Hell** genre. The main idea for the gameplay is surviving randomly generated _lasers_ with different patterns of striking.
 
 ## **Current Functionality (~15 main code commits):**
 - Registration and Login
@@ -10,8 +10,8 @@ We made a game in the **Bullet Hell** genre.  The main idea for the gameplay is 
 - Leaderboard
 - Viewing a Profile
 
-## **development features**
-The local server must be run separately, detailed information is available in the README at /server/
+## **Development features**
+You can find development commands in a README at _/source/_. If you want the app to connect to the **local server**, you must run it separately, detailed information is available in a README at _/server/_.
 
 ## **Screenshots of Current Design:**
 ![image](https://github.com/user-attachments/assets/2c37c6de-d379-459b-a86b-f75c2d959d16)
