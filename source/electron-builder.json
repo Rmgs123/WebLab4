@@ -1,5 +1,6 @@
 {
-    "appId": "com.electron.app",
+    "appId": "com.laserrun.app",
+    "productName": "Laser Run",
     "directories": {
         "output": "dist"
     },
@@ -7,7 +8,7 @@
         "oneClick": false,
         "perMachine": false,
         "allowToChangeInstallationDirectory": true,
-        "shortcutName": "Electron App"
+        "shortcutName": "Laser Run"
     },
     "win": {
         "target": "nsis"

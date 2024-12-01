@@ -3,12 +3,10 @@ const vuePlugin = require('@vitejs/plugin-vue')
 
 const { defineConfig } = require('vite');
 
-/**
- * https://vitejs.dev/config
- */
 const config = defineConfig({
     root: Path.join(__dirname, 'src', 'renderer'),
     publicDir: 'public',
+    base: './', // Добавлено это свойство
     server: {
         port: 8080,
     },

@@ -1,65 +1,36 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-const { app, BrowserWindow, ipcMain, Menu, session } = require('electron');
-const { join } = require('path');
+const { app, BrowserWindow, Menu } = require('electron');
+const path = require('path');
 
-let mainWindow;
+const isDev = !app.isPackaged;
 
 function createWindow() {
-    mainWindow = new BrowserWindow({
-        width: 800,
-        height: 600,
-        minWidth: 800,
-        minHeight: 600,
-        webPreferences: {
-            preload: join(__dirname, 'preload.js'),
-            nodeIntegration: false,
-            contextIsolation: true,
-        }
-    });
-
-    Menu.setApplicationMenu(null);
-
-    if (process.env.NODE_ENV === 'development') {
-        const rendererPort = process.argv[2];
-        mainWindow.loadURL(`http://localhost:${rendererPort}`);
+  const win = new BrowserWindow({
+    width: 800,
+    height: 600,
+    webPreferences: {
+      preload: path.join(__dirname, 'preload.js'),
+      nodeIntegration: false,
+      contextIsolation: true,
     }
-    else {
-        mainWindow.loadFile(join(app.getAppPath(), 'renderer', 'index.html'));
-    }
+  });
+
+  Menu.setApplicationMenu(null);
+
+  if (isDev) {
+    win.loadURL('http://localhost:8080');
+    win.webContents.openDevTools();
+  } else {
+    const indexPath = path.join(app.getAppPath(), 'renderer', 'index.html');
+    win.loadFile(indexPath);
+  }
 }
 
-app.whenReady().then(() => {
-    createWindow();
+app.whenReady().then(createWindow);
 
-    session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
-        callback({
-            responseHeaders: {
-                ...details.responseHeaders,
-                'Content-Security-Policy': ['script-src \'self\'']
-            }
-        });
-    });
-
-    app.on('activate', function () {
-        if (BrowserWindow.getAllWindows().length === 0) {
-            createWindow();
-        }
-    });
+app.on('window-all-closed', () => {
+  if (process.platform !== 'darwin') app.quit();
 });
 
-app.on('window-all-closed', function () {
-    if (process.platform !== 'darwin')
-        app.quit();
-});
-
-ipcMain.on('message', (event, message) => {
-    console.log(message);
-});
-
-ipcMain.on('toggle-fullscreen', (event) => {
-    const win = BrowserWindow.getFocusedWindow();
-    if (win) {
-        win.setFullScreen(!win.isFullScreen());
-    }
+app.on('activate', () => {
+  if (BrowserWindow.getAllWindows().length === 0) createWindow();
 });

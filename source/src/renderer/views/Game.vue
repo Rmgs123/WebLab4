@@ -406,7 +406,6 @@
                 laser.initialAngle = laser.angle;
                 laser.opacityGradient = this.calculateOpacityGradient(laser.width);
                 laser.isActive = false; // Лазер не активен в фазе подготовки
-                // Генерируем путь лазера сразу, включая отражения
                 laser.path = this.calculateLaserPath(
                   laser.x,
                   laser.y,
@@ -417,7 +416,6 @@
 
               this.lasers.push(laser);
 
-              // Настройка времени активации и длительности выстрела
               let activationDelay;
               let activeDuration;
               if (laserType === 'red') {
@@ -442,11 +440,9 @@
 
               if (laserType === 'purple'){return;}
 
-                // Для зелёного лазера используем особую логику
               setTimeout(() => {
                 laser.isActive = true;
 
-                // Обработка коллизии во время активного состояния
                 const collisionInterval = setInterval(() => {
                 if (
                   this.circleIntersectsRotatedRect(
@@ -508,35 +504,27 @@
               const rectHeight = rect.height;
               const rectAngle = rect.angle;
 
-              // Центр прямоугольника
               const rectCenterX = rect.x;
               const rectCenterY = rect.y;
 
-              // Переводим угол в радианы
               const theta = (Math.PI / 180) * -rectAngle;
 
-              // Вычисляем синус и косинус угла
               const cosTheta = Math.cos(theta);
               const sinTheta = Math.sin(theta);
 
-              // Переносим круг в систему координат прямоугольника
               const dx = circle.x - rectCenterX;
               const dy = circle.y - rectCenterY;
 
-              // Поворачиваем координаты в обратную сторону
               const rotatedX = dx * cosTheta - dy * sinTheta;
               const rotatedY = dx * sinTheta + dy * cosTheta;
 
-              // Находим ближайшую точку на прямоугольнике к центру круга
               const closestX = Math.max(0, Math.min(rectWidth, rotatedX));
               const closestY = Math.max(0, Math.min(rectHeight, rotatedY));
 
-              // Вычисляем расстояние от этой точки до центра круга
               const distanceX = rotatedX - closestX;
               const distanceY = rotatedY - closestY;
               const distanceSquared = distanceX * distanceX + distanceY * distanceY;
 
-              // Используем радиус коллизии вместо визуального радиуса
               return distanceSquared < this.collisionRadius * this.collisionRadius;
             },
 
@@ -596,7 +584,6 @@
                 } else if (laser.color === 'blue' || laser.color === 'cyan' || laser.color === 'green' || laser.color === 'orange') {
                   // Лазер синий или зелёный, обновляем угол и длину на протяжении всей жизни
                   if (laser.color === 'blue' || laser.color === 'cyan') {
-                    // Существующая логика для синего лазера
                     const elapsed = now - laser.rotationStartTime;
                     const rotationDuration = laser.rotationDuration; // Общее время вращения
                     if (laser.color === 'cyan'){
@@ -625,7 +612,6 @@
                       // Лазер выстреливает, обработка происходит в setTimeout внутри spawnLaser
                     }
                   } else if (laser.color === 'orange') {
-                    // Существующая логика для синего лазера
                     const elapsed = now - laser.creationTime;
 
                     if (elapsed < laser.duration) {
@@ -637,7 +623,6 @@
                     }
                   }
 
-                  // Теперь обновляем позицию и длину лазера для синего и зелёного лазеров
                   const points = this.getLineRectangleIntersections(
                     laser.x,
                     laser.y,
@@ -779,7 +764,6 @@
                     })
                         .then(response => {
                             console.log('Score sent successfully:', response.data);
-                            // Обновляем значение userScore после успешной отправки
                             this.userScore = this.elapsedTime;
                         })
                         .catch(error => {
@@ -955,67 +939,67 @@
   position: absolute;
   transform-origin: top left;
   transition: background-color 0.2s, box-shadow 0.2s;
-  border-radius: 2.5px; /* Закругленные концы лазера */
+  border-radius: 2.5px;
 }
 
 .laser.red {
   background-color: rgba(255, 0, 0, 0.2);
-  box-shadow: 0 0 5px rgba(255, 0, 0, 0.3); /* Тусклое красное свечение */
+  box-shadow: 0 0 5px rgba(255, 0, 0, 0.3);
 }
 
 .laser.red.active {
   background-color: rgba(255, 0, 0, 1);
-  box-shadow: 0 0 15px rgba(255, 0, 0, 0.8); /* Яркое красное свечение */
+  box-shadow: 0 0 15px rgba(255, 0, 0, 0.8);
 }
 
 .laser.yellow {
   background-color: rgba(255, 255, 0, 0.2);
-  box-shadow: 0 0 5px rgba(255, 255, 0, 0.3); /* Тусклое жёлтое свечение */
+  box-shadow: 0 0 5px rgba(255, 255, 0, 0.3);
 }
 
 .laser.yellow.active {
   background-color: rgba(255, 255, 0, 1);
-  box-shadow: 0 0 15px rgba(255, 255, 0, 0.8); /* Яркое жёлтое свечение */
+  box-shadow: 0 0 15px rgba(255, 255, 0, 0.8);
 }
 
 .laser.blue {
   background-color: rgba(64, 224, 208, 0.2);
-  box-shadow: 0 0 5px rgba(64, 224, 208, 0.3); /* Тусклое синее свечение */
+  box-shadow: 0 0 5px rgba(64, 224, 208, 0.3);
 }
 
 .laser.blue.active {
   background-color: rgba(64, 224, 208, 1);
-  box-shadow: 0 0 15px rgba(64, 224, 208, 0.8); /* Яркое синее свечение */
+  box-shadow: 0 0 15px rgba(64, 224, 208, 0.8);
 }
 
 .laser.cyan {
   background-color: rgba(0, 0, 224, 0.2);
-  box-shadow: 0 0 5px rgba(0, 0, 224, 0.3); /* Тусклое синее свечение */
+  box-shadow: 0 0 5px rgba(0, 0, 224, 0.3);
 }
 
 .laser.cyan.active {
   background-color: rgba(0, 0, 224, 1);
-  box-shadow: 0 0 15px rgba(0, 0, 224, 0.8); /* Яркое синее свечение */
+  box-shadow: 0 0 15px rgba(0, 0, 224, 0.8);
 }
 
 /* Новый стиль для зелёного лазера */
 .laser.green {
-  background-color: rgba(0, 255, 0, 0.1); /* Едва видимый зелёный */
+  background-color: rgba(0, 255, 0, 0.1);
   box-shadow: 0 0 5px rgba(0, 255, 0, 0.2);
 }
 
 .laser.green.active {
-  background-color: rgba(0, 255, 0, 1); /* Яркий зелёный при выстреле */
+  background-color: rgba(0, 255, 0, 1);
   box-shadow: 0 0 15px rgba(0, 255, 0, 0.8);
 }
 
 .laser.orange {
-  background-color: rgba(255, 165, 0, 0.1); /* Едва видимый зелёный */
+  background-color: rgba(255, 165, 0, 0.1);
   box-shadow: 0 0 5px rgba(255, 165, 0, 0.2);
 }
 
 .laser.orange.active {
-  background-color: rgba(255, 165, 0, 1); /* Яркий зелёный при выстреле */
+  background-color: rgba(255, 165, 0, 1);
   box-shadow: 0 0 15px rgba(255, 165, 0, 0.8);
 }
 
@@ -1053,7 +1037,7 @@
 }
 
 .laser.purple {
-  background-color: rgba(128, 0, 128, 0.1); /* Тёмный фиолетовый в фазе подготовки */
+  background-color: rgba(128, 0, 128, 0.1);
   box-shadow: 0 0 5px rgba(128, 0, 128, 0.3);
 }
 
@@ -1079,7 +1063,7 @@
 }
 
 .laser.purple.active {
-  background-color: rgba(128, 0, 128, 1); /* Яркий фиолетовый при выстреле */
+  background-color: rgba(128, 0, 128, 1);
   box-shadow: 0 0 15px rgba(128, 0, 128, 0.8);
 }
 </style>
