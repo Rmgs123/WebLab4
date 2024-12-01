@@ -11,7 +11,7 @@ We made a game in the **Bullet Hell** genre.  The main idea for the gameplay is 
 -Viewing a Profile
 
 ## **development features**
-The local server must be run separately, detailed information is available in the README in score
+The local server must be run separately, detailed information is available in the README at /server/
 
 ## **Screenshots of Current Design:**
 ![image](https://github.com/user-attachments/assets/2c37c6de-d379-459b-a86b-f75c2d959d16)
