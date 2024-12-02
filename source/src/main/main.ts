@@ -3,8 +3,10 @@ const path = require('path');
 
 const isDev = !app.isPackaged;
 
+let mainWindow;
+
 function createWindow() {
-  const win = new BrowserWindow({
+  mainWindow = new BrowserWindow({
     width: 800,
     height: 600,
     webPreferences: {
@@ -17,15 +19,26 @@ function createWindow() {
   Menu.setApplicationMenu(null);
 
   if (isDev) {
-    win.loadURL('http://localhost:8080');
-    win.webContents.openDevTools();
+    mainWindow.loadURL('http://localhost:8080');
+    mainWindow.webContents.openDevTools();
   } else {
     const indexPath = path.join(app.getAppPath(), 'renderer', 'index.html');
-    win.loadFile(indexPath);
+    mainWindow.loadFile(indexPath);
   }
 }
 
-app.whenReady().then(createWindow);
+app.whenReady().then(() => {
+  createWindow();
+
+  app.on('browser-window-focus', () => {
+    mainWindow.webContents.on('before-input-event', (event, input) => {
+      if (input.key === 'F11') {
+        event.preventDefault();
+        mainWindow.setFullScreen(!mainWindow.isFullScreen());
+      }
+    });
+  });
+});
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit();

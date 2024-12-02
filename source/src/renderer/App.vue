@@ -20,11 +20,6 @@ function handleKeyDown(event: KeyboardEvent) {
       window.electronAPI.setZoomFactor(currentZoomFactor);
     }
   }
-
-  if (event.key === 'F11') {
-    event.preventDefault();
-    window.electronAPI.toggleFullScreen();
-  }
 }
 
 onMounted(() => {
