@@ -367,7 +367,7 @@
                 laser.direction = edge1%2===0 ? 0 : 1;
                 laser.creationTime = performance.now();
                 laser.duration = 3000;
-                laser.movement = 0.75;
+                laser.movement = 0.15;
               } else if (laserType === 'blue') {
                 // Настройки для синих лазеров
                 laser.x0 = point1.x;
