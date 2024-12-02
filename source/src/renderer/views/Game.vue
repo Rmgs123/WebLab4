@@ -106,7 +106,7 @@
                 playerX: 190,
                 playerY: 190,
                 playerSpeed: 5,
-                playerSpeedMultiplier: 0.2,
+                playerSpeedMultiplier: 0.25,
                 playerRadius: 6,
                 collisionRadius: 4, // Радиус для проверки коллизии - меньше персонажа для приятной игры
                 keysPressed: {},
@@ -815,7 +815,7 @@
                 console.log("Ошибка при получении данных:", e);
             });
 
-        const FPS = 60;
+        const FPS = 360;
         const FRAME_TIME = 1000/FPS;
         let lastFrameTime = performance.now();
         this.startGame();
